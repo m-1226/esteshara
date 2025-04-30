@@ -1,4 +1,6 @@
 // features/specialists/data/repos/specialist_repo_impl.dart
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esteshara/core/services/firebase_service.dart';
 import 'package:esteshara/features/specialists/data/models/specialist_model.dart';
@@ -11,22 +13,22 @@ class SpecialistRepoImpl implements SpecialistRepo {
       : _firebaseService = firebaseService;
 
   @override
-  Future<List<Specialist>> getAllSpecialists() async {
+  Future<List<SpecialistModel>> getAllSpecialists() async {
     try {
       final QuerySnapshot querySnapshot =
           await _firebaseService.firestore.collection('specialists').get();
 
       return querySnapshot.docs
-          .map((doc) => Specialist.fromDocumentSnapshot(doc))
+          .map((doc) => SpecialistModel.fromDocumentSnapshot(doc))
           .toList();
     } catch (e) {
-      print('Error fetching specialists: $e');
+      log('Error fetching specialists: $e');
       return [];
     }
   }
 
   @override
-  Future<List<Specialist>> getSpecialistsBySpecialization(
+  Future<List<SpecialistModel>> getSpecialistsBySpecialization(
       String specialization) async {
     try {
       final QuerySnapshot querySnapshot = await _firebaseService.firestore
@@ -35,16 +37,16 @@ class SpecialistRepoImpl implements SpecialistRepo {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => Specialist.fromDocumentSnapshot(doc))
+          .map((doc) => SpecialistModel.fromDocumentSnapshot(doc))
           .toList();
     } catch (e) {
-      print('Error fetching specialists by specialization: $e');
+      log('Error fetching specialists by specialization: $e');
       return [];
     }
   }
 
   @override
-  Future<Specialist?> getSpecialistById(String id) async {
+  Future<SpecialistModel?> getSpecialistById(String id) async {
     try {
       final DocumentSnapshot docSnapshot = await _firebaseService.firestore
           .collection('specialists')
@@ -52,11 +54,11 @@ class SpecialistRepoImpl implements SpecialistRepo {
           .get();
 
       if (docSnapshot.exists) {
-        return Specialist.fromDocumentSnapshot(docSnapshot);
+        return SpecialistModel.fromDocumentSnapshot(docSnapshot);
       }
       return null;
     } catch (e) {
-      print('Error fetching specialist by ID: $e');
+      log('Error fetching specialist by ID: $e');
       return null;
     }
   }

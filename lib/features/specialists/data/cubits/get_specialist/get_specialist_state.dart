@@ -1,19 +1,19 @@
 // features/specialists/presentation/cubit/specialists_state.dart
 import 'package:esteshara/features/specialists/data/models/specialist_model.dart';
 
-abstract class SpecialistsState {}
+abstract class GetSpecialistsState {}
 
-class SpecialistsInitial extends SpecialistsState {}
+class SpecialistsInitial extends GetSpecialistsState {}
 
-class SpecialistsLoading extends SpecialistsState {}
+class SpecialistsLoading extends GetSpecialistsState {}
 
-class SpecialistsLoaded extends SpecialistsState {
-  final List<Specialist> specialists;
+class SpecialistsLoaded extends GetSpecialistsState {
+  final List<SpecialistModel> specialists;
 
   SpecialistsLoaded({required this.specialists});
 }
 
-class SpecialistsError extends SpecialistsState {
+class SpecialistsError extends GetSpecialistsState {
   final String message;
 
   SpecialistsError({required this.message});

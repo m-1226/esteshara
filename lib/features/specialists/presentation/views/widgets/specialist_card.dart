@@ -1,29 +1,26 @@
 // features/specialists/presentation/widgets/specialist_card.dart
+import 'package:esteshara/features/specialists/data/models/specialist_model.dart';
 import 'package:flutter/material.dart';
 
+import 'appointment_booking_bottom_sheet.dart';
+
 class SpecialistCard extends StatelessWidget {
-  final String name;
-  final String specialization;
-  final String bio;
-  final List<String> availableDays;
-  final String? photoUrl;
+  final SpecialistModel specialist;
   final VoidCallback onTap;
-  final double price;
 
   const SpecialistCard({
     super.key,
-    required this.name,
-    required this.specialization,
-    required this.bio,
-    required this.availableDays,
-    this.photoUrl,
+    required this.specialist,
     required this.onTap,
-    this.price = 300, // Default price
   });
 
   @override
   Widget build(BuildContext context) {
-    final double rating = 4.5; // Mock rating - would come from your data model
+    // Get color based on specialization
+    final Color specialistColor =
+        _getSpecializationColor(specialist.specialization);
+    final Color lightColor = specialistColor.withOpacity(0.1);
+    final Color borderColor = specialistColor.withOpacity(0.3);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -58,10 +55,9 @@ class SpecialistCard extends StatelessWidget {
                         width: 60,
                         height: 60,
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
+                          color: lightColor,
                           shape: BoxShape.circle,
-                          border:
-                              Border.all(color: Colors.blue.shade100, width: 2),
+                          border: Border.all(color: borderColor, width: 2),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.1),
@@ -70,18 +66,19 @@ class SpecialistCard extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: photoUrl != null && photoUrl!.isNotEmpty
+                        child: specialist.photoUrl.isNotEmpty
                             ? CircleAvatar(
-                                backgroundImage: NetworkImage(photoUrl!),
+                                backgroundImage:
+                                    NetworkImage(specialist.photoUrl),
                               )
                             : CircleAvatar(
-                                backgroundColor: Colors.blue.shade100,
+                                backgroundColor: lightColor,
                                 child: Text(
-                                  name[0].toUpperCase(),
+                                  specialist.name[0].toUpperCase(),
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.blue.shade700,
+                                    color: specialistColor,
                                   ),
                                 ),
                               ),
@@ -94,7 +91,7 @@ class SpecialistCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              name,
+                              specialist.name,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -107,15 +104,15 @@ class SpecialistCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
+                                color: lightColor,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                specialization,
+                                specialist.specialization,
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
-                                  color: Colors.blue.shade700,
+                                  color: specialistColor,
                                 ),
                               ),
                             ),
@@ -143,9 +140,10 @@ class SpecialistCard extends StatelessWidget {
                       Row(
                         children: List.generate(5, (index) {
                           return Icon(
-                            index < rating.floor()
+                            index < specialist.rating.floor()
                                 ? Icons.star
-                                : (index == rating.floor() && rating % 1 > 0)
+                                : (index == specialist.rating.floor() &&
+                                        specialist.rating % 1 > 0)
                                     ? Icons.star_half
                                     : Icons.star_border,
                             color: Colors.amber,
@@ -155,14 +153,14 @@ class SpecialistCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        rating.toString(),
+                        specialist.rating.toString(),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.grey.shade700,
                         ),
                       ),
                       Text(
-                        ' (124)',
+                        ' (${specialist.reviewCount})',
                         style: TextStyle(
                           color: Colors.grey.shade500,
                           fontSize: 12,
@@ -175,7 +173,9 @@ class SpecialistCard extends StatelessWidget {
 
                   // Bio text with improved typography
                   Text(
-                    bio.length > 100 ? '${bio.substring(0, 100)}...' : bio,
+                    specialist.bio.length > 100
+                        ? '${specialist.bio.substring(0, 100)}...'
+                        : specialist.bio,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey.shade600,
@@ -208,21 +208,20 @@ class SpecialistCard extends StatelessWidget {
                     height: 36,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
-                      children: availableDays
-                          .map((day) => Container(
+                      children: specialist.availableTimes
+                          .map((time) => Container(
                                 margin: const EdgeInsets.only(right: 8),
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.1),
+                                  color: lightColor,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                      color: Colors.blue.withOpacity(0.3)),
+                                  border: Border.all(color: borderColor),
                                 ),
                                 child: Text(
-                                  day,
-                                  style: const TextStyle(
-                                    color: Colors.blue,
+                                  time.day,
+                                  style: TextStyle(
+                                    color: specialistColor,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -249,11 +248,11 @@ class SpecialistCard extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              'EGP ${price.toInt()}',
-                              style: const TextStyle(
+                              'EGP ${specialist.price.toInt()}',
+                              style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blue,
+                                color: specialistColor,
                               ),
                             ),
                           ],
@@ -263,10 +262,10 @@ class SpecialistCard extends StatelessWidget {
                       // Book button with enhanced styling
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: onTap,
+                          onPressed: () => _showBookingBottomSheet(context),
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.white,
-                            backgroundColor: Colors.blue.shade600,
+                            backgroundColor: specialistColor,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -287,6 +286,41 @@ class SpecialistCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  // Helper method to get color for specialization
+  Color _getSpecializationColor(String specialization) {
+    final Map<String, Color> specializationColors = {
+      'Cardiologist': Colors.red.shade400,
+      'Dermatologist': Colors.purple.shade400,
+      'Pediatrician': Colors.green.shade400,
+      'Business Consultant': Colors.blue.shade400,
+      'Career Coach': Colors.orange.shade400,
+      'Financial Advisor': Colors.teal.shade400,
+      'Neurologist': Colors.indigo.shade400,
+      'Psychiatrist': Colors.pink.shade400,
+    };
+
+    return specializationColors[specialization] ?? Colors.blue.shade600;
+  }
+
+  // Show booking bottom sheet
+  void _showBookingBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          builder: (_, controller) {
+            return AppointmentBookingBottomSheet(specialist: specialist);
+          },
+        );
+      },
     );
   }
 }

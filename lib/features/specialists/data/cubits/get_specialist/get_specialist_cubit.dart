@@ -3,10 +3,10 @@ import 'package:esteshara/features/specialists/data/cubits/get_specialist/get_sp
 import 'package:esteshara/features/specialists/data/repos/spcialists/specialist_repo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class SpecialistsCubit extends Cubit<SpecialistsState> {
+class GetSpecialistsCubit extends Cubit<GetSpecialistsState> {
   final SpecialistRepo specialistRepo;
 
-  SpecialistsCubit({required this.specialistRepo})
+  GetSpecialistsCubit({required this.specialistRepo})
       : super(SpecialistsInitial());
 
   Future<void> getAllSpecialists() async {

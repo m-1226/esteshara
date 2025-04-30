@@ -2,8 +2,8 @@
 import 'package:esteshara/features/specialists/data/models/specialist_model.dart';
 
 abstract class SpecialistRepo {
-  Future<List<Specialist>> getAllSpecialists();
-  Future<List<Specialist>> getSpecialistsBySpecialization(
+  Future<List<SpecialistModel>> getAllSpecialists();
+  Future<List<SpecialistModel>> getSpecialistsBySpecialization(
       String specialization);
-  Future<Specialist?> getSpecialistById(String id);
+  Future<SpecialistModel?> getSpecialistById(String id);
 }

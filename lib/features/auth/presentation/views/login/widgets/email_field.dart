@@ -23,7 +23,7 @@ class EmailField extends StatelessWidget {
       },
       keyboardType: TextInputType.emailAddress,
       controller: emailController,
-      prefixIcon: const Icon(Icons.person),
+      prefixIcon: const Icon(Icons.email),
       hintText: 'الإيميل',
       textInputAction: TextInputAction.next,
     );
