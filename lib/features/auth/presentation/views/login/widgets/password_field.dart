@@ -6,11 +6,14 @@ class PasswordField extends StatefulWidget {
   const PasswordField({
     super.key,
     this.onFieldSubmitted,
-    this.controller,
+    this.passwordController,
+    this.validator,
+    this.hintText,
   });
   final void Function(String)? onFieldSubmitted;
-  final TextEditingController? controller;
-
+  final TextEditingController? passwordController;
+  final String? Function(String?)? validator;
+  final String? hintText;
   @override
   State<PasswordField> createState() => _PasswordFieldState();
 }
@@ -21,13 +24,14 @@ class _PasswordFieldState extends State<PasswordField> {
   @override
   Widget build(BuildContext context) {
     return CustomTextFormField(
-      validator: (value) {
-        if (value?.isEmpty ?? true) {
-          return 'يرجي كتابة كلمة السر';
-        }
-        return null;
-      },
-      controller: widget.controller,
+      validator: widget.validator ??
+          (value) {
+            if (value?.isEmpty ?? true) {
+              return 'يرجي كتابة كلمة السر';
+            }
+            return null;
+          },
+      controller: widget.passwordController,
       obscureText: !isPasswordVisible,
       prefixIcon: const Icon(Icons.lock),
       suffixIcon: IconButton(
@@ -41,7 +45,7 @@ class _PasswordFieldState extends State<PasswordField> {
           });
         },
       ),
-      hintText: 'كلمة السر',
+      hintText: widget.hintText ?? 'كلمة السر',
       textInputAction: TextInputAction.done,
       onFieldSubmitted: widget.onFieldSubmitted,
     );

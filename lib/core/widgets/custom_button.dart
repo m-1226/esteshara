@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:esteshara/core/utils/app_colors.dart';
 import 'package:esteshara/core/utils/app_styles.dart';
 import 'package:esteshara/core/widgets/custom_loading_indicator.dart';
+import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
   final String buttonText;
@@ -44,12 +44,12 @@ class CustomButton extends StatelessWidget {
                 child: isLoading
                     ? CustomLoadingIndicator(
                         size: 27,
-                        color: AppColors.kSecondaryColor,
+                        color: AppColors.kWhite,
                       )
                     : Text(
                         buttonText,
-                        style: AppStyles.bold16
-                            .copyWith(color: AppColors.kSecondaryColor),
+                        style:
+                            AppStyles.bold16.copyWith(color: AppColors.kWhite),
                         textAlign: TextAlign.center,
                       ),
               ),

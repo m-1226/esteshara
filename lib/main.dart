@@ -44,13 +44,13 @@ class QydAdmin extends StatelessWidget {
           child: MaterialApp.router(
             routerConfig: AppRouters.routes,
             debugShowCheckedModeBanner: false,
-            locale: const Locale('ar', 'AR'),
+            locale: const Locale('en', 'US'),
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: const [Locale('ar', 'AR')],
+            supportedLocales: const [Locale('en', 'US')],
             theme: AppThemes.lightTheme,
             darkTheme: AppThemes.darkTheme,
             themeMode: state.themeMode,

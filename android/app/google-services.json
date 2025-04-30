@@ -12,7 +12,12 @@
           "package_name": "com.example.esteshara"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "661177449736-hpuk2id58tt7bcipumaf2p3fsr0okdpu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyATOP10srdf3OjRGBIiSuDIzqOMw9w5hC8"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "661177449736-hpuk2id58tt7bcipumaf2p3fsr0okdpu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "661177449736-mget44hgjl3bj144oggafn3e4re85s3n.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.esteshara"
+              }
+            }
+          ]
         }
       }
     }

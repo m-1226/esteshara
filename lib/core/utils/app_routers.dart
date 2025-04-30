@@ -1,6 +1,7 @@
 // core/utils/app_routers.dart
 import 'package:esteshara/features/app%20navigator/presentation/views/app_navigator.dart';
 import 'package:esteshara/features/auth/presentation/views/login/login_view.dart';
+import 'package:esteshara/features/auth/presentation/views/signup/signup_view.dart';
 import 'package:esteshara/features/specialists/presentation/views/specialists_view.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -23,11 +24,18 @@ abstract class AppRouters {
       //   path: kSplashView,
       //   builder: (context, state) => const SplashView(),
       // ),
-      GoRoute(path: kLoginView, builder: (context, state) => const LoginView()),
+      GoRoute(
+        path: kLoginView,
+        builder: (context, state) => const LoginView(),
+      ),
+      GoRoute(
+        path: kSignupView,
+        builder: (context, state) => const SignUpView(),
+      ),
+
       StatefulShellRoute.indexedStack(
-        builder:
-            (context, state, navigationShell) =>
-                AppNavigator(navigationShell: navigationShell),
+        builder: (context, state, navigationShell) =>
+            AppNavigator(navigationShell: navigationShell),
         branches: [
           // Dashboard
           StatefulShellBranch(
@@ -35,9 +43,7 @@ abstract class AppRouters {
               GoRoute(
                 path: kSpecialistsView,
                 builder: (context, state) => const SpecialistsView(),
-                routes: [
-                  // Add nested routes here if needed
-                ],
+                routes: [],
               ),
             ],
           ),

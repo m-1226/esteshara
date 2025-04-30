@@ -1,8 +1,9 @@
 import 'package:esteshara/core/utils/app_routers.dart';
 import 'package:esteshara/core/widgets/custom_button.dart';
-import 'package:esteshara/core/widgets/custom_text_form_field.dart';
 import 'package:esteshara/core/widgets/custom_text_ink.dart';
 import 'package:esteshara/features/auth/data/cubits/login/login_cubit.dart';
+import 'package:esteshara/features/auth/presentation/views/login/widgets/email_field.dart';
+import 'package:esteshara/features/auth/presentation/views/login/widgets/google_login_bloc_builder.dart';
 import 'package:esteshara/features/auth/presentation/views/login/widgets/password_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,10 +35,11 @@ class _LoginFormState extends State<LoginForm> {
   void submitForm() {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
-      BlocProvider.of<LoginCubit>(context).loginWithEmailAndPassword(
-        emailController.text,
-        passwordController.text,
-      );
+      context.pushReplacement(AppRouters.kSpecialistsView);
+      // BlocProvider.of<LoginCubit>(context).loginWithEmailAndPassword(
+      //   emailController.text,
+      //   passwordController.text,
+      // );
     } else {
       setState(() {
         autovalidateMode = AutovalidateMode.always;
@@ -52,26 +54,10 @@ class _LoginFormState extends State<LoginForm> {
       autovalidateMode: autovalidateMode,
       child: Column(
         children: [
-          CustomTextFormField(
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'يرجى كتابة الإيميل';
-              } else if (!RegExp(
-                      r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
-                  .hasMatch(value)) {
-                return 'يرجي كتابة الإيميل بشكل صحيح';
-              }
-              return null;
-            },
-            keyboardType: TextInputType.emailAddress,
-            controller: emailController,
-            prefixIcon: const Icon(Icons.person),
-            hintText: 'الإيميل',
-            textInputAction: TextInputAction.next,
-          ),
+          EmailField(emailController: emailController),
           Gap(10),
           PasswordField(
-            controller: passwordController,
+            passwordController: passwordController,
             onFieldSubmitted: (_) => submitForm(),
           ),
           Gap(15),
@@ -92,7 +78,7 @@ class _LoginFormState extends State<LoginForm> {
             },
           ),
           const SizedBox(height: 15),
-          // GoogleLoginButtonBlocBuilder(),
+          GoogleLoginButtonBlocBuilder(),
           const SizedBox(height: 20),
           CustomTextInk(
             text1: 'ليس لديك حساب؟  ',

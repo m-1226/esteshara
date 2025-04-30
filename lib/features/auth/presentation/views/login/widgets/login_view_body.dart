@@ -14,6 +14,7 @@ class LoginViewBody extends StatelessWidget {
         child: Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               LoginForm(),
             ],

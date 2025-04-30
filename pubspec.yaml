@@ -48,7 +48,7 @@ dependencies:
 
 flutter_assets:
   assets_path: assets/images/
-  output_path: lib/utils/app_assets.dart
+  output_path: lib/core/utils/
   filename: app_assets.dart
   field_prefix: null
 
