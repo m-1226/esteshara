@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "661177449736",
+    "project_id": "esteshara-project",
+    "storage_bucket": "esteshara-project.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:661177449736:android:a90c88955b626658ff00bd",
+        "android_client_info": {
+          "package_name": "com.example.esteshara"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATOP10srdf3OjRGBIiSuDIzqOMw9w5hC8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
