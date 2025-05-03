@@ -297,7 +297,6 @@ class SpecialistCard extends StatelessWidget {
       'Pediatrician': Colors.green.shade400,
       'Business Consultant': Colors.blue.shade400,
       'Career Coach': Colors.orange.shade400,
-      'Financial Advisor': Colors.teal.shade400,
       'Neurologist': Colors.indigo.shade400,
       'Psychiatrist': Colors.pink.shade400,
     };

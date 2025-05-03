@@ -3,6 +3,9 @@ import 'package:esteshara/core/services/setup_service_locator.dart';
 import 'package:esteshara/core/utils/app_constants.dart';
 import 'package:esteshara/core/utils/app_routers.dart';
 import 'package:esteshara/core/utils/app_themes.dart';
+import 'package:esteshara/features/specialists/data/cubits/get_specialist/get_specialist_cubit.dart';
+import 'package:esteshara/features/specialists/data/repos/spcialists/specialist_repo.dart';
+import 'package:esteshara/features/specialists/data/services/add_specialists_to_firestore.dart';
 import 'package:esteshara/firebase_options.dart';
 import 'package:esteshara/simple_bloc_observer.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -27,10 +30,16 @@ void main() async {
         BlocProvider(
           create: (context) => ThemeCubit(),
         ),
+        BlocProvider(
+          create: (context) => GetSpecialistsCubit(
+            specialistRepo: getIt<SpecialistRepo>(),
+          ),
+        ),
       ],
       child: const QydAdmin(),
     ),
   );
+  addSpecialistsData();
 }
 
 class QydAdmin extends StatelessWidget {
