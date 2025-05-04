@@ -54,6 +54,10 @@ class Assets {
   /// assets/images/in_progess.svg
   static const String imagesInProgess = "assets/images/in_progess.svg";
 
+  /// Assets for imagesLoginAppLogo
+  /// assets/images/login_app_Logo.png
+  static const String imagesLoginAppLogo = "assets/images/login_app_Logo.png";
+
   /// Assets for imagesLoginDialogIcon
   /// assets/images/login_dialog_icon.svg
   static const String imagesLoginDialogIcon = "assets/images/login_dialog_icon.svg";

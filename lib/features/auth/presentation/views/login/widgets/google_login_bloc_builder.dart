@@ -23,7 +23,7 @@ class GoogleLoginButtonBlocBuilder extends StatelessWidget {
           ),
           isLoading: state is LoginGoogleLoading,
           onPressed: () {
-            // BlocProvider.of<LoginCubit>(context).signInWithGoogle();
+            BlocProvider.of<LoginCubit>(context).signInWithGoogle();
           },
         );
       },

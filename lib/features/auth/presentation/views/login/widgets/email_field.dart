@@ -14,17 +14,18 @@ class EmailField extends StatelessWidget {
     return CustomTextFormField(
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'يرجى كتابة الإيميل';
+          return 'Email is required';
         } else if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
             .hasMatch(value)) {
-          return 'يرجي كتابة الإيميل بشكل صحيح';
+          return 'Email is invalid';
         }
         return null;
       },
       keyboardType: TextInputType.emailAddress,
       controller: emailController,
+      textAlign: TextAlign.left,
       prefixIcon: const Icon(Icons.email),
-      hintText: 'الإيميل',
+      hintText: 'Email Address',
       textInputAction: TextInputAction.next,
     );
   }

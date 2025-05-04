@@ -27,7 +27,7 @@ class _PasswordFieldState extends State<PasswordField> {
       validator: widget.validator ??
           (value) {
             if (value?.isEmpty ?? true) {
-              return 'يرجي كتابة كلمة السر';
+              return 'Password is required';
             }
             return null;
           },
@@ -45,8 +45,9 @@ class _PasswordFieldState extends State<PasswordField> {
           });
         },
       ),
-      hintText: widget.hintText ?? 'كلمة السر',
+      hintText: widget.hintText ?? 'Password',
       textInputAction: TextInputAction.done,
+      textAlign: TextAlign.left,
       onFieldSubmitted: widget.onFieldSubmitted,
     );
   }

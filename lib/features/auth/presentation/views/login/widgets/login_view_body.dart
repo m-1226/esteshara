@@ -1,5 +1,7 @@
+import 'package:esteshara/features/auth/presentation/views/login/widgets/login_app_logo.dart';
 import 'package:esteshara/features/auth/presentation/views/login/widgets/login_form.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 
 class LoginViewBody extends StatelessWidget {
   const LoginViewBody({super.key});
@@ -16,6 +18,8 @@ class LoginViewBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              LoginAppLogo(),
+              Gap(10),
               LoginForm(),
             ],
           ),

@@ -30,4 +30,18 @@ class LoginCubit extends Cubit<LoginState> {
       emit(LoginFailure(errMessage: e.toString()));
     }
   }
+
+  Future<void> signInWithGoogle() async {
+    emit(LoginGoogleLoading());
+    try {
+      User? user = await authRepo.signInWithGoogle();
+      if (user != null) {
+        emit(LoginSuccess());
+      } else {
+        emit(LoginFailure(errMessage: 'حدث خطأ أثناء تسجيل الدخول'));
+      }
+    } catch (e) {
+      emit(LoginFailure(errMessage: e.toString()));
+    }
+  }
 }

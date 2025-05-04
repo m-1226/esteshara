@@ -3,6 +3,8 @@ import 'package:esteshara/core/services/setup_service_locator.dart';
 import 'package:esteshara/core/utils/app_constants.dart';
 import 'package:esteshara/core/utils/app_routers.dart';
 import 'package:esteshara/core/utils/app_themes.dart';
+import 'package:esteshara/features/appointments/data/cubits/appointments_cubit.dart';
+import 'package:esteshara/features/appointments/data/repos/appointments/appointments_repo.dart';
 import 'package:esteshara/features/specialists/data/cubits/get_specialist/get_specialist_cubit.dart';
 import 'package:esteshara/features/specialists/data/repos/spcialists/specialist_repo.dart';
 import 'package:esteshara/features/specialists/data/services/add_specialists_to_firestore.dart';
@@ -35,15 +37,20 @@ void main() async {
             specialistRepo: getIt<SpecialistRepo>(),
           ),
         ),
+        BlocProvider(
+          create: (context) => AppointmentsCubit(
+            appointmentsRepo: getIt<AppointmentsRepo>(),
+          ),
+        ),
       ],
-      child: const QydAdmin(),
+      child: const Esteshara(),
     ),
   );
   addSpecialistsData();
 }
 
-class QydAdmin extends StatelessWidget {
-  const QydAdmin({super.key});
+class Esteshara extends StatelessWidget {
+  const Esteshara({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,13 +60,13 @@ class QydAdmin extends StatelessWidget {
           child: MaterialApp.router(
             routerConfig: AppRouters.routes,
             debugShowCheckedModeBanner: false,
-            locale: const Locale('ar', 'AR'),
+            locale: const Locale('en', 'US'),
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: const [Locale('ar', 'AR')],
+            supportedLocales: const [Locale('en', 'US')],
             theme: AppThemes.lightTheme,
             darkTheme: AppThemes.darkTheme,
             themeMode: state.themeMode,

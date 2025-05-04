@@ -13,30 +13,27 @@ class AppNavigator extends StatelessWidget {
   Widget build(BuildContext context) {
     final navBarColor =
         Theme.of(context).bottomNavigationBarTheme.backgroundColor ??
-        Colors.white;
+            Colors.white;
     final theme = Theme.of(context);
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: theme.appBarTheme.systemOverlayStyle!.statusBarColor,
-        statusBarIconBrightness:
-            theme.brightness == Brightness.dark
-                ? Brightness.light
-                : Brightness.dark,
+        statusBarIconBrightness: theme.brightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark,
       ),
     );
     return SafeArea(
       child: Scaffold(
         body: PersistentTabView.router(
-          avoidBottomPadding: true,
           navBarHeight: 60,
           navBarOverlap: NavBarOverlap.none(),
           navigationShell: navigationShell,
           backgroundColor: navBarColor,
-          navBarBuilder:
-              (navBarConfig) => Style12BottomNavBar(
-                navBarDecoration: NavBarDecoration(color: navBarColor),
-                navBarConfig: navBarConfig,
-              ),
+          navBarBuilder: (navBarConfig) => Style12BottomNavBar(
+            navBarDecoration: NavBarDecoration(color: navBarColor),
+            navBarConfig: navBarConfig,
+          ),
           tabs: bottomNavBarItems(context),
         ),
       ),

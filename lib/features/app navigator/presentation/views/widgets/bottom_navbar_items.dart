@@ -7,12 +7,22 @@ List<PersistentRouterTabConfig> bottomNavBarItems(BuildContext context) {
     buildNavBarItem(
       context: context,
       icon: const Icon(Icons.dashboard),
-      title: "الرئيسية",
+      title: "Home",
     ),
     buildNavBarItem(
       context: context,
-      icon: const Icon(Icons.account_circle),
-      title: "المواعيد",
+      icon: const Icon(Icons.av_timer),
+      title: "Appointments",
+    ),
+    buildNavBarItem(
+      context: context,
+      icon: const Icon(Icons.favorite),
+      title: "Favorites",
+    ),
+    buildNavBarItem(
+      context: context,
+      icon: const Icon(Icons.person),
+      title: "Account",
     ),
   ];
 }

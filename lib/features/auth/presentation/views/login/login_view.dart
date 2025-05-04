@@ -56,7 +56,9 @@ class _LoginViewState extends State<LoginView> {
         },
         builder: (context, state) {
           return const Scaffold(
-            body: LoginViewBody(),
+            body: SingleChildScrollView(
+              child: LoginViewBody(),
+            ),
           );
         },
       ),
