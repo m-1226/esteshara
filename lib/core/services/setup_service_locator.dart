@@ -4,8 +4,8 @@ import 'package:esteshara/features/appointments/data/repos/appointments/appointm
 import 'package:esteshara/features/appointments/data/repos/appointments/appointments_repo_impl.dart';
 import 'package:esteshara/features/auth/data/repos/auth/auth_repo.dart';
 import 'package:esteshara/features/auth/data/repos/auth/auth_repo_impl.dart';
-import 'package:esteshara/features/specialists/data/repos/spcialists/specialist_repo.dart';
-import 'package:esteshara/features/specialists/data/repos/spcialists/specialist_repo_impl.dart';
+import 'package:esteshara/features/home/data/repos/spcialists/specialist_repo.dart';
+import 'package:esteshara/features/home/data/repos/spcialists/specialist_repo_impl.dart';
 import 'package:get_it/get_it.dart';
 
 final GetIt getIt = GetIt.instance;

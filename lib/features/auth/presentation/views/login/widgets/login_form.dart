@@ -35,7 +35,7 @@ class _LoginFormState extends State<LoginForm> {
   void submitForm() {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
-      context.pushReplacement(AppRouters.kSpecialistsView);
+      context.pushReplacement(AppRouters.kHomeView);
       // BlocProvider.of<LoginCubit>(context).loginWithEmailAndPassword(
       //   emailController.text,
       //   passwordController.text,
@@ -62,7 +62,7 @@ class _LoginFormState extends State<LoginForm> {
           ),
           Gap(15),
           CustomTextInk(
-            text1: 'نسيت كلمة المرور؟',
+            text1: 'Forgot password?',
             onPressed: () {
               // context.push(AppRouter.kResetPasswordView);
             },
@@ -72,7 +72,7 @@ class _LoginFormState extends State<LoginForm> {
             builder: (context, state) {
               return CustomButton(
                 isLoading: state is LoginLoading,
-                buttonText: 'تسجيل الدخول',
+                buttonText: 'Login',
                 onPressed: submitForm,
               );
             },
@@ -81,8 +81,8 @@ class _LoginFormState extends State<LoginForm> {
           GoogleLoginButtonBlocBuilder(),
           const SizedBox(height: 20),
           CustomTextInk(
-            text1: 'ليس لديك حساب؟  ',
-            text2: 'سجل الأن',
+            text1: 'Don\'t have an account?  ',
+            text2: 'Register now',
             onPressed: () {
               context.pushReplacement(AppRouters.kSignupView);
             },

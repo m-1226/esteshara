@@ -1,5 +1,5 @@
 // features/appointments/utils/appointment_utils.dart
-import 'package:esteshara/features/specialists/data/models/specialist_model.dart';
+import 'package:esteshara/features/home/data/models/specialist_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

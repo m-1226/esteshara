@@ -15,7 +15,7 @@ class GoogleLoginButtonBlocBuilder extends StatelessWidget {
       builder: (context, state) {
         return SocialLoginButton(
           progressColor: Colors.green,
-          buttonText: 'تسجيل الدخول Google',
+          buttonText: 'Sign in with Google',
           icon: Image.asset(
             Assets.imagesGoogle,
             width: 25,

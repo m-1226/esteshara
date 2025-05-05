@@ -5,9 +5,8 @@ import 'package:esteshara/core/utils/app_routers.dart';
 import 'package:esteshara/core/utils/app_themes.dart';
 import 'package:esteshara/features/appointments/data/cubits/appointments_cubit.dart';
 import 'package:esteshara/features/appointments/data/repos/appointments/appointments_repo.dart';
-import 'package:esteshara/features/specialists/data/cubits/get_specialist/get_specialist_cubit.dart';
-import 'package:esteshara/features/specialists/data/repos/spcialists/specialist_repo.dart';
-import 'package:esteshara/features/specialists/data/services/add_specialists_to_firestore.dart';
+import 'package:esteshara/features/home/data/cubits/get_specialist/get_specialist_cubit.dart';
+import 'package:esteshara/features/home/data/repos/spcialists/specialist_repo.dart';
 import 'package:esteshara/firebase_options.dart';
 import 'package:esteshara/simple_bloc_observer.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -46,7 +45,7 @@ void main() async {
       child: const Esteshara(),
     ),
   );
-  addSpecialistsData();
+  // addSpecialistsData();
 }
 
 class Esteshara extends StatelessWidget {

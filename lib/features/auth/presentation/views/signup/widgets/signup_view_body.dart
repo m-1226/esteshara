@@ -1,6 +1,6 @@
+import 'package:esteshara/features/auth/presentation/views/login/widgets/login_app_logo.dart';
 import 'package:esteshara/features/auth/presentation/views/signup/widgets/signup_form.dart';
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 
 class SignUpViewBody extends StatelessWidget {
   const SignUpViewBody({super.key});
@@ -13,10 +13,8 @@ class SignUpViewBody extends StatelessWidget {
         horizontal: 16,
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Gap(20),
+          LoginAppLogo(),
           SignUpForm(),
         ],
       ),

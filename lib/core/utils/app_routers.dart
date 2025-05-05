@@ -3,15 +3,22 @@ import 'package:esteshara/features/app%20navigator/presentation/views/app_naviga
 import 'package:esteshara/features/appointments/presentation/views/appointments_view.dart';
 import 'package:esteshara/features/auth/presentation/views/login/login_view.dart';
 import 'package:esteshara/features/auth/presentation/views/signup/signup_view.dart';
-import 'package:esteshara/features/specialists/presentation/views/specialists_view.dart';
+import 'package:esteshara/features/home/data/models/specialist_model.dart';
+import 'package:esteshara/features/home/presentation/views/home_view.dart';
+import 'package:esteshara/features/home/presentation/views/specialist_details_view.dart';
+import 'package:esteshara/features/profile/presentation/views/profile_view.dart';
+import 'package:esteshara/features/splash/presentation/views/splash_view.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 abstract class AppRouters {
   static const String kSplashView = '/';
-  static const String kSpecialistsView = '/specialists';
+  static const String kHomeView = '/home';
+  static const String kSpecialistDetailsView = 'specialistDetails';
+  static const String kNestedSpecialistDetailsView =
+      '$kHomeView/$kSpecialistDetailsView';
   static const String kAppointmentsView = '/appointments';
-  static const String kUserDetailsView = 'specialistDetails';
+  static const String kProfileView = '/profile';
   static const String kLoginView = '/login';
   static const String kSignupView = '/signup';
 
@@ -20,12 +27,12 @@ abstract class AppRouters {
 
   static final routes = GoRouter(
     navigatorKey: navigatorKey,
-    initialLocation: kLoginView,
+    initialLocation: kSplashView,
     routes: [
-      // GoRoute(
-      //   path: kSplashView,
-      //   builder: (context, state) => const SplashView(),
-      // ),
+      GoRoute(
+        path: kSplashView,
+        builder: (context, state) => const SplashView(),
+      ),
       GoRoute(
         path: kLoginView,
         builder: (context, state) => const LoginView(),
@@ -34,7 +41,6 @@ abstract class AppRouters {
         path: kSignupView,
         builder: (context, state) => const SignUpView(),
       ),
-
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppNavigator(navigationShell: navigationShell),
@@ -43,9 +49,17 @@ abstract class AppRouters {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: kSpecialistsView,
-                builder: (context, state) => const SpecialistsView(),
-                routes: [],
+                path: kHomeView,
+                builder: (context, state) => const HomeView(),
+                routes: [
+                  GoRoute(
+                    name: kSpecialistDetailsView,
+                    path: kSpecialistDetailsView,
+                    builder: (context, state) => SpecialistDetailsView(
+                      specialist: state.extra as SpecialistModel,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -54,6 +68,15 @@ abstract class AppRouters {
               GoRoute(
                 path: kAppointmentsView,
                 builder: (context, state) => const AppointmentsView(),
+                routes: [],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: kProfileView,
+                builder: (context, state) => const ProfileView(),
                 routes: [],
               ),
             ],

@@ -4,7 +4,7 @@ import 'package:esteshara/features/appointments/presentation/views/widgets/appoi
 import 'package:esteshara/features/appointments/presentation/views/widgets/date_selector_item.dart';
 import 'package:esteshara/features/appointments/presentation/views/widgets/spcialist_info_widget.dart';
 import 'package:esteshara/features/appointments/presentation/views/widgets/time_slot_widget.dart';
-import 'package:esteshara/features/specialists/data/models/specialist_model.dart';
+import 'package:esteshara/features/home/data/models/specialist_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

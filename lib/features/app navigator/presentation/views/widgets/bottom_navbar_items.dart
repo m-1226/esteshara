@@ -16,13 +16,8 @@ List<PersistentRouterTabConfig> bottomNavBarItems(BuildContext context) {
     ),
     buildNavBarItem(
       context: context,
-      icon: const Icon(Icons.favorite),
-      title: "Favorites",
-    ),
-    buildNavBarItem(
-      context: context,
       icon: const Icon(Icons.person),
-      title: "Account",
+      title: "Profile",
     ),
   ];
 }
