@@ -73,12 +73,16 @@ class AppointmentCard extends StatelessWidget {
                   // Specialist info
                   _buildSpecialistInfo(),
 
+                  // Last Modified info (if applicable)
+                  if (appointment.lastModified != null)
+                    _buildLastModifiedInfo(context),
+
                   // Action buttons
                   if (isUpcoming &&
                       (appointment.canCancel() || appointment.canReschedule()))
                     _buildActionButtons(context),
 
-                  // Cannot cancel/reschedule message
+                  // Cannot cancel message
                   if (isUpcoming && !appointment.canCancel())
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
@@ -92,9 +96,89 @@ class AppointmentCard extends StatelessWidget {
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              'Cannot modify (less than 6 hours notice)',
+                              'Cannot cancel (less than 6 hours before appointment)',
                               style: TextStyle(
                                 color: Colors.orange.shade700,
+                                fontSize: 12,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Show rescheduling window info if applicable
+                  if (isUpcoming &&
+                      appointment.canCancel() &&
+                      !appointment.canReschedule())
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.timer_off,
+                            size: 14,
+                            color: Colors.grey.shade700,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Rescheduling window (2 hours from booking) has expired',
+                              style: TextStyle(
+                                color: Colors.grey.shade700,
+                                fontSize: 12,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Show rescheduling time remaining if applicable
+                  if (isUpcoming && appointment.canReschedule())
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.timer,
+                            size: 14,
+                            color: Colors.green.shade700,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Rescheduling window: ${appointment.getRescheduleTimeRemaining()}',
+                              style: TextStyle(
+                                color: Colors.green.shade700,
+                                fontSize: 12,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Clarification about cancellation policy
+                  if (isUpcoming && appointment.canCancel())
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 14,
+                            color: Colors.blue.shade700,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Cancellation available until 2 hours before appointment time',
+                              style: TextStyle(
+                                color: Colors.blue.shade700,
                                 fontSize: 12,
                                 fontStyle: FontStyle.italic,
                               ),
@@ -216,6 +300,13 @@ class AppointmentCard extends StatelessWidget {
     final hours = difference.inHours;
     final minutes = difference.inMinutes % 60;
 
+    // Get appointment duration in minutes
+    final durationMinutes = appointment.getDurationMinutes();
+    final durationText = durationMinutes >= 60
+        ? '${durationMinutes ~/ 60} hour${durationMinutes >= 120 ? 's' : ''}'
+        : '$durationMinutes mins';
+
+    // Construct compact remaining time text to avoid overflow
     String remainingText = '';
     if (difference.isNegative) {
       // Appointment has passed
@@ -223,14 +314,14 @@ class AppointmentCard extends StatelessWidget {
         remainingText = 'In progress';
       }
     } else if (hours < 24) {
-      // Less than a day
+      // Less than a day - compact format
       if (hours > 0) {
-        remainingText = 'Starts in $hours hour${hours != 1 ? 's' : ''}';
+        remainingText = '$hours h';
         if (minutes > 0) {
-          remainingText += ' $minutes min${minutes != 1 ? 's' : ''}';
+          remainingText += ' $minutes m';
         }
       } else {
-        remainingText = 'Starts in $minutes minute${minutes != 1 ? 's' : ''}';
+        remainingText = '$minutes m';
       }
     }
 
@@ -257,7 +348,7 @@ class AppointmentCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'to $endTime',
+                  'to $endTime ($durationText)',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey.shade600,
@@ -274,6 +365,7 @@ class AppointmentCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min, // Prevent overflow
                   children: [
                     Icon(
                       hours < 6 ? Icons.timer : Icons.timer_outlined,
@@ -282,7 +374,7 @@ class AppointmentCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      remainingText,
+                      'In $remainingText',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -320,6 +412,35 @@ class AppointmentCard extends StatelessWidget {
           // Loading or error state
           return const SpecialistLoading();
         },
+      ),
+    );
+  }
+
+  Widget _buildLastModifiedInfo(BuildContext context) {
+    final dateFormat = DateFormat('MMM d, yyyy, h:mm a');
+    final formattedDate = dateFormat.format(appointment.lastModified!);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 12),
+      child: Row(
+        children: [
+          Icon(
+            Icons.update,
+            size: 14,
+            color: Colors.grey.shade600,
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              'Last modified: $formattedDate',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

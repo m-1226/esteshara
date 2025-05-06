@@ -6,17 +6,17 @@ List<PersistentRouterTabConfig> bottomNavBarItems(BuildContext context) {
   return [
     buildNavBarItem(
       context: context,
-      icon: const Icon(Icons.dashboard),
+      icon: const Icon(Icons.medical_services_rounded),
       title: "Home",
     ),
     buildNavBarItem(
       context: context,
-      icon: const Icon(Icons.av_timer),
+      icon: const Icon(Icons.calendar_today_rounded),
       title: "Appointments",
     ),
     buildNavBarItem(
       context: context,
-      icon: const Icon(Icons.person),
+      icon: const Icon(Icons.account_circle_rounded),
       title: "Profile",
     ),
   ];

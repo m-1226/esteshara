@@ -1,29 +1,29 @@
 import 'package:esteshara/core/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 
-class UsernameField extends StatelessWidget {
-  const UsernameField({
+class PhoneField extends StatelessWidget {
+  const PhoneField({
     super.key,
-    required this.usernameController,
+    required this.phoneController,
   });
 
-  final TextEditingController usernameController;
+  final TextEditingController phoneController;
 
   @override
   Widget build(BuildContext context) {
     return CustomTextFormField(
-      hintText: 'Username',
+      hintText: 'Phone Number',
       validator: (value) {
         if (value?.isEmpty ?? true) {
-          return 'Please enter a username';
+          return 'Please enter a phone number';
         }
         return null;
       },
-      keyboardType: TextInputType.emailAddress,
+      keyboardType: TextInputType.phone,
       textAlign: TextAlign.left,
-      controller: usernameController,
+      controller: phoneController,
       prefixIcon: const Icon(
-        Icons.person,
+        Icons.phone,
       ),
     );
   }

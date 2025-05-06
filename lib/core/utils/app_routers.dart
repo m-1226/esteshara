@@ -6,6 +6,7 @@ import 'package:esteshara/features/auth/presentation/views/signup/signup_view.da
 import 'package:esteshara/features/home/data/models/specialist_model.dart';
 import 'package:esteshara/features/home/presentation/views/home_view.dart';
 import 'package:esteshara/features/home/presentation/views/specialist_details_view.dart';
+import 'package:esteshara/features/introduction/presentation/views/introduction_view.dart';
 import 'package:esteshara/features/profile/presentation/views/profile_view.dart';
 import 'package:esteshara/features/splash/presentation/views/splash_view.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import 'package:go_router/go_router.dart';
 
 abstract class AppRouters {
   static const String kSplashView = '/';
+  static const String kIntroductionView = '/introduction';
   static const String kHomeView = '/home';
   static const String kSpecialistDetailsView = 'specialistDetails';
   static const String kNestedSpecialistDetailsView =
@@ -32,6 +34,10 @@ abstract class AppRouters {
       GoRoute(
         path: kSplashView,
         builder: (context, state) => const SplashView(),
+      ),
+      GoRoute(
+        path: kIntroductionView,
+        builder: (context, state) => const IntroductionView(),
       ),
       GoRoute(
         path: kLoginView,

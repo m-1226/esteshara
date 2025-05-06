@@ -69,12 +69,13 @@ class AppointmentsRepoImpl implements AppointmentsRepo {
       // Generate unique ID for appointment
       final appointmentId = const Uuid().v4();
 
-      // Create appointment model
+      // Create appointment model with current timestamp
       final appointment = AppointmentModel(
         id: appointmentId,
         specialistId: specialistId,
         appointmentDate: appointmentDate,
         timeSlot: timeSlot,
+        createdAt: DateTime.now(), // Set creation time explicitly
       );
 
       // Get user document
@@ -136,12 +137,11 @@ class AppointmentsRepoImpl implements AppointmentsRepo {
 
       // Find the appointment to reschedule
       bool found = false;
+      int appointmentIndex = -1;
+
       for (int i = 0; i < appointments.length; i++) {
         if (appointments[i]['id'] == appointmentId) {
-          // Update appointment date and time slot
-          appointments[i]['appointmentDate'] =
-              Timestamp.fromDate(newAppointmentDate);
-          appointments[i]['timeSlot'] = newTimeSlot;
+          appointmentIndex = i;
           found = true;
           break;
         }
@@ -150,6 +150,23 @@ class AppointmentsRepoImpl implements AppointmentsRepo {
       if (!found) {
         throw Exception('Appointment not found');
       }
+
+      // Convert to AppointmentModel to validate rescheduling eligibility
+      final currentAppointment =
+          AppointmentModel.fromMap(appointments[appointmentIndex]);
+
+      // Verify the appointment can be rescheduled
+      if (!currentAppointment.canReschedule()) {
+        throw Exception(
+            'Appointment is no longer eligible for rescheduling. Rescheduling must be done within 2 hours of booking.');
+      }
+
+      // Update appointment with new date, time, and lastModified
+      appointments[appointmentIndex]['appointmentDate'] =
+          Timestamp.fromDate(newAppointmentDate);
+      appointments[appointmentIndex]['timeSlot'] = newTimeSlot;
+      appointments[appointmentIndex]['lastModified'] =
+          Timestamp.fromDate(DateTime.now());
 
       // Update user document with modified appointments
       await _firebaseService.firestore.collection('users').doc(userId).update({
@@ -190,8 +207,9 @@ class AppointmentsRepoImpl implements AppointmentsRepo {
       bool found = false;
       for (int i = 0; i < appointments.length; i++) {
         if (appointments[i]['id'] == appointmentId) {
-          // Update status to cancelled
+          // Update status to cancelled and add lastModified timestamp
           appointments[i]['status'] = 'cancelled';
+          appointments[i]['lastModified'] = Timestamp.fromDate(DateTime.now());
           found = true;
           break;
         }

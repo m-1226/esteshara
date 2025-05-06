@@ -9,9 +9,12 @@ class AppointmentsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(context),
-      body: const AppointmentsViewBody(),
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: _buildAppBar(context),
+        body: const AppointmentsViewBody(),
+      ),
     );
   }
 

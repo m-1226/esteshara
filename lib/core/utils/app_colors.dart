@@ -33,5 +33,15 @@ class AppColors {
       Color(0xFFE2E8F0); // Light gray for text
   static const Color kDarkTextSecondary =
       Color(0xFFA0AEC0); // Medium gray for secondary text
-}
 
+  // Specialization colors
+  static final Map<String, Color> specializationColors = {
+    'Cardiologist': Colors.red.shade400,
+    'Dermatologist': Colors.purple.shade400,
+    'Pediatrician': Colors.green.shade400,
+    'Business Consultant': Colors.blue.shade400,
+    'Career Coach': Colors.orange.shade400,
+    'Neurologist': Colors.indigo.shade400,
+    'Psychiatrist': Colors.pink.shade400,
+  };
+}
