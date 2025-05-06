@@ -1,8 +1,6 @@
 // features/appointments/presentation/views/appointments_view.dart
-import 'package:esteshara/features/appointments/data/cubits/appointments_cubit.dart';
 import 'package:esteshara/features/appointments/presentation/views/widgets/apppointments_view_body.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AppointmentsView extends StatelessWidget {
   const AppointmentsView({super.key});
@@ -10,7 +8,7 @@ class AppointmentsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         appBar: _buildAppBar(context),
         body: const AppointmentsViewBody(),
@@ -39,13 +37,6 @@ class AppointmentsView extends StatelessWidget {
           icon: const Icon(Icons.notifications_outlined),
           onPressed: () {
             // Show notifications
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.refresh),
-          onPressed: () {
-            // Refresh appointments
-            context.read<AppointmentsCubit>().loadAppointments();
           },
         ),
       ],

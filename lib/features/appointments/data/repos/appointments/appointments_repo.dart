@@ -1,23 +1,24 @@
-// features/appointments/data/repos/appointments_repo.dart
+// features/appointments/data/repos/appointments/appointments_repo.dart
 import 'package:esteshara/core/models/appointment_model.dart';
 
 abstract class AppointmentsRepo {
-  // Get all appointments for the current user
+  /// Gets user appointments as a one-time fetch
   Future<List<AppointmentModel>> getUserAppointments();
 
-  // Book a new appointment
+  /// Gets a real-time stream of user appointments that updates automatically
+  Stream<List<AppointmentModel>> getAppointmentsStream();
+
   Future<String> bookAppointment({
     required String specialistId,
     required DateTime appointmentDate,
     required String timeSlot,
   });
 
-// Add to AppointmentsRepo
   Future<void> rescheduleAppointment({
     required String appointmentId,
     required DateTime newAppointmentDate,
     required String newTimeSlot,
   });
-  // Cancel an appointment
+
   Future<void> cancelAppointment(String appointmentId);
 }

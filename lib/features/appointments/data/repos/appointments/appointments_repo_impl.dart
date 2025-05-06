@@ -1,4 +1,4 @@
-// features/appointments/data/repos/appointments_repo_impl.dart
+// features/appointments/data/repos/appointments/appointments_repo_impl.dart
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -54,6 +54,46 @@ class AppointmentsRepoImpl implements AppointmentsRepo {
   }
 
   @override
+  Stream<List<AppointmentModel>> getAppointmentsStream() {
+    try {
+      // Get current user ID
+      final userId = _firebaseService.currentUser?.uid;
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Return a stream that updates when the document changes
+      return _firebaseService.firestore
+          .collection('users')
+          .doc(userId)
+          .snapshots()
+          .map((snapshot) {
+        if (!snapshot.exists) {
+          return [];
+        }
+
+        final userData = snapshot.data() as Map<String, dynamic>;
+
+        if (userData['appointments'] == null) {
+          return [];
+        }
+
+        final appointments = (userData['appointments'] as List)
+            .map((appointmentData) => AppointmentModel.fromMap(
+                appointmentData as Map<String, dynamic>))
+            .toList();
+
+        log('Appointments stream received ${appointments.length} appointments');
+        return appointments;
+      });
+    } catch (e) {
+      log('Error setting up appointments stream: $e');
+      // For streams, we need to convert the error to a stream error
+      return Stream.error(e);
+    }
+  }
+
+  @override
   Future<String> bookAppointment({
     required String specialistId,
     required DateTime appointmentDate,
@@ -92,11 +132,15 @@ class AppointmentsRepoImpl implements AppointmentsRepo {
             .update({
           'appointments': FieldValue.arrayUnion([appointment.toMap()]),
         });
+
+        log('Appointment booked with ID: $appointmentId');
       } else {
         // Create user document if it doesn't exist
         await _firebaseService.firestore.collection('users').doc(userId).set({
           'appointments': [appointment.toMap()],
         });
+
+        log('User document created and appointment booked with ID: $appointmentId');
       }
 
       return appointmentId;
@@ -172,6 +216,8 @@ class AppointmentsRepoImpl implements AppointmentsRepo {
       await _firebaseService.firestore.collection('users').doc(userId).update({
         'appointments': appointments,
       });
+
+      log('Appointment rescheduled: $appointmentId');
     } catch (e) {
       log('Error rescheduling appointment: $e');
       rethrow;
@@ -223,6 +269,8 @@ class AppointmentsRepoImpl implements AppointmentsRepo {
       await _firebaseService.firestore.collection('users').doc(userId).update({
         'appointments': appointments,
       });
+
+      log('Appointment cancelled: $appointmentId');
     } catch (e) {
       log('Error cancelling appointment: $e');
       rethrow;
