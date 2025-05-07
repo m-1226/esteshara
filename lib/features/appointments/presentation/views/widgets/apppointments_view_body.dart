@@ -8,12 +8,9 @@ import 'package:esteshara/features/appointments/presentation/views/widgets/appoi
 import 'package:esteshara/features/appointments/presentation/views/widgets/appointment_loading_view.dart';
 import 'package:esteshara/features/appointments/presentation/views/widgets/appointment_tab_bar.dart';
 import 'package:esteshara/features/appointments/presentation/views/widgets/appointments_list_view.dart';
-import 'package:esteshara/features/appointments/presentation/views/widgets/canel_appointment_dialog.dart';
-import 'package:esteshara/features/appointments/presentation/views/widgets/reschedule_dialog_content.dart';
-import 'package:esteshara/features/home/data/cubits/get_specialist/get_specialist_cubit.dart';
-import 'package:esteshara/features/home/data/repos/spcialists/specialist_repo.dart';
+import 'package:esteshara/features/appointments/presentation/views/widgets/cancel_confirmation_dailog.dart';
+import 'package:esteshara/features/appointments/presentation/views/widgets/show_reshedule_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AppointmentsViewBody extends StatefulWidget {
   const AppointmentsViewBody({super.key});
@@ -94,8 +91,8 @@ class _AppointmentsViewBodyState extends State<AppointmentsViewBody> {
                       AppointmentsListView(
                         appointments: upcomingAppointments,
                         isUpcoming: true,
-                        onCancelPressed: _confirmCancellation,
-                        onReschedulePressed: _showRescheduleDialog,
+                        onCancelPressed: confirmCancellation,
+                        onReschedulePressed: showRescheduleDialog,
                       ),
 
                       // Cancelled appointments
@@ -115,52 +112,6 @@ class _AppointmentsViewBodyState extends State<AppointmentsViewBody> {
           ),
         ),
       ],
-    );
-  }
-
-  void _confirmCancellation(BuildContext context, String appointmentId) {
-    showDialog(
-      context: context,
-      builder: (_) => CancelAppointmentDialog(
-        appointmentId: appointmentId,
-        onCancel: () async {
-          // Call repository directly
-          await _appointmentsRepo.cancelAppointment(appointmentId);
-          // No need to reload - stream will update automatically
-        },
-      ),
-    );
-  }
-
-  void _showRescheduleDialog(
-      BuildContext context, AppointmentModel appointment) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => Dialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: BlocProvider(
-          create: (_) => GetSpecialistsCubit(
-            specialistRepo: getIt<SpecialistRepo>(),
-          )..getAllSpecialists(),
-          child: RescheduleDialogContent(
-            appointment: appointment,
-            onReschedule: (newDate, newTimeSlot) async {
-              Navigator.pop(dialogContext);
-
-              // Call repository directly
-              await _appointmentsRepo.rescheduleAppointment(
-                appointmentId: appointment.id,
-                newAppointmentDate: newDate,
-                newTimeSlot: newTimeSlot,
-              );
-              // No need to reload - stream will update automatically
-            },
-          ),
-        ),
-      ),
     );
   }
 }

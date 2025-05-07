@@ -10,11 +10,15 @@ class GetSpecialistsCubit extends Cubit<GetSpecialistsState> {
       : super(SpecialistsInitial());
 
   Future<void> getAllSpecialists() async {
+    if (isClosed) return; // Check if cubit is already closed
+
     emit(SpecialistsLoading());
     try {
       final specialists = await specialistRepo.getAllSpecialists();
+      if (isClosed) return; // Check again after async operation
       emit(SpecialistsLoaded(specialists: specialists));
     } catch (e) {
+      if (isClosed) return; // Check before emitting error state
       emit(SpecialistsError(message: 'Failed to load specialists'));
     }
   }
