@@ -4,12 +4,20 @@ class SpecialistAvatar extends StatelessWidget {
   final String photoUrl;
   final String name;
   final bool isAvailableToday;
+  final double? width;
+  final double? height;
+  final double? borderRadius;
+  final double? indicatorSize;
 
   const SpecialistAvatar({
     super.key,
     required this.photoUrl,
     required this.name,
     required this.isAvailableToday,
+    this.width = 80,
+    this.height = 100,
+    this.borderRadius = 12,
+    this.indicatorSize = 18,
   });
 
   @override
@@ -17,12 +25,12 @@ class SpecialistAvatar extends StatelessWidget {
     return Stack(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius ?? 12),
           child: photoUrl.isNotEmpty
               ? Image.network(
                   photoUrl,
-                  width: 80,
-                  height: 100,
+                  width: width,
+                  height: height,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return _buildAvatarFallback();
@@ -35,8 +43,8 @@ class SpecialistAvatar extends StatelessWidget {
             right: 0,
             bottom: 0,
             child: Container(
-              width: 18,
-              height: 18,
+              width: indicatorSize,
+              height: indicatorSize,
               decoration: BoxDecoration(
                 color: Colors.green,
                 shape: BoxShape.circle,
@@ -50,8 +58,8 @@ class SpecialistAvatar extends StatelessWidget {
 
   Widget _buildAvatarFallback() {
     return Container(
-      width: 80,
-      height: 100,
+      width: width,
+      height: height,
       color: Colors.grey.shade200,
       child: Center(
         child: Text(
