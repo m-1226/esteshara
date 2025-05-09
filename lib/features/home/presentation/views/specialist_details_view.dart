@@ -14,15 +14,18 @@ class SpecialistDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SpecialistDetailsViewBody(specialist: specialist),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          _showBookingBottomSheet(context);
-        },
-        icon: const Icon(Icons.calendar_today),
-        label: const Text('Book Appointment'),
-        backgroundColor: Theme.of(context).primaryColor,
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        body: SpecialistDetailsViewBody(specialist: specialist),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            _showBookingBottomSheet(context);
+          },
+          icon: const Icon(Icons.calendar_today),
+          label: const Text('Book Appointment'),
+          backgroundColor: Theme.of(context).primaryColor,
+        ),
       ),
     );
   }
