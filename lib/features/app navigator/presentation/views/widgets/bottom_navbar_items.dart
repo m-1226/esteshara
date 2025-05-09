@@ -11,7 +11,7 @@ List<PersistentRouterTabConfig> bottomNavBarItems(BuildContext context) {
     ),
     buildNavBarItem(
       context: context,
-      icon: const Icon(Icons.calendar_today_rounded),
+      icon: const Icon(Icons.schedule),
       title: "Appointments",
     ),
     buildNavBarItem(

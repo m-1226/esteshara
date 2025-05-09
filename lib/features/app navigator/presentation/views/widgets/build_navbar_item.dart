@@ -11,10 +11,9 @@ PersistentRouterTabConfig buildNavBarItem({
 }) {
   return PersistentRouterTabConfig(
     item: ItemConfig(
-
       activeForegroundColor:
           Theme.of(context).bottomNavigationBarTheme.selectedItemColor ??
-          AppColors.kPrimaryColor,
+              AppColors.kPrimaryColor,
       activeColorSecondary: Colors.transparent,
       inactiveIcon: inActiveIcon,
       icon: icon,

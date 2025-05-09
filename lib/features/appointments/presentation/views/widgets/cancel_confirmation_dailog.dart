@@ -11,9 +11,7 @@ void confirmCancellation(BuildContext context, String appointmentId) {
     builder: (_) => CancelAppointmentDialog(
       appointmentId: appointmentId,
       onCancel: () async {
-        // Call repository directly
         await appointmentsRepo.cancelAppointment(appointmentId);
-        // No need to reload - stream will update automatically
       },
     ),
   );

@@ -132,6 +132,7 @@ class _HomeViewState extends State<HomeView> {
       ),
       floatingActionButton: ScrollToTopButton(
         scrollController: scrollController,
+        showThreshold: 200.0, // Show after scrolling 200 pixels
       ),
     );
   }

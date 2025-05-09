@@ -1,4 +1,3 @@
-// features/profile/presentation/views/widgets/profile_stats_card.dart
 import 'package:flutter/material.dart';
 
 class ProfileStatsCard extends StatelessWidget {
@@ -18,33 +17,27 @@ class ProfileStatsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.grey.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 22,
-            ),
+          Icon(
+            icon,
+            color: color,
+            size: 28,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Text(
             value,
             style: TextStyle(
@@ -60,7 +53,6 @@ class ProfileStatsCard extends StatelessWidget {
               fontSize: 12,
               color: Colors.grey.shade600,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),

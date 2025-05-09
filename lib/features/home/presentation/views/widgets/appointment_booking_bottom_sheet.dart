@@ -25,81 +25,103 @@ class _AppointmentBookingBottomSheetState
   String? _selectedTimeSlot;
   List<String> _availableTimeSlots = [];
   bool _isLoading = false;
+  final DateFormat _dayFormat = DateFormat('EEEE');
+  final DateFormat _timeFormat = DateFormat('hh:mm a');
 
   @override
   void initState() {
     super.initState();
-    // Find the next available day
     _findNextAvailableDay();
   }
 
   void _findNextAvailableDay() {
-    // Get the day names of available times
     final availableDayNames =
         widget.specialist.availableTimes.map((time) => time.day).toList();
-
-    // Start from today
     DateTime checkDate = DateTime.now();
 
-    // Check up to 14 days ahead
     for (int i = 0; i < 14; i++) {
-      // Get the day name (e.g., "Monday")
-      final dayName = DateFormat('EEEE').format(checkDate);
-
-      // If this day name is in available days, select it
+      final dayName = _dayFormat.format(checkDate);
       if (availableDayNames.contains(dayName)) {
         setState(() {
           _selectedDate = checkDate;
-          // Update time slots for this day
           _updateAvailableTimeSlots(dayName);
         });
         return;
       }
-
-      // Try the next day
       checkDate = checkDate.add(const Duration(days: 1));
     }
-
-    // If no available day found, keep today's date
   }
 
-  // Update available time slots based on selected day
   void _updateAvailableTimeSlots(String dayName) {
-    // Find the matching availability time for the day
-    final availabilityTime = widget.specialist.availableTimes
-        .firstWhere((time) => time.day == dayName,
-            orElse: () => AvailabilityTime(
-                  day: dayName,
-                  startTime: '09:00 AM',
-                  endTime: '05:00 PM',
-                ));
+    final availabilityTime = widget.specialist.availableTimes.firstWhere(
+      (time) => time.day == dayName,
+      orElse: () => AvailabilityTime(
+        day: dayName,
+        startTime: '09:00 AM',
+        endTime: '05:00 PM',
+      ),
+    );
 
-    // Generate time slots based on start and end time
-    _availableTimeSlots = _generateTimeSlots(
+    // Generate all time slots first
+    List<String> allTimeSlots = _generateTimeSlots(
       availabilityTime.startTime,
       availabilityTime.endTime,
     );
 
-    // Reset selected time slot
+    // Filter time slots if selected date is today
+    if (DateUtils.isSameDay(_selectedDate, DateTime.now())) {
+      final now = DateTime.now();
+
+      // Filter out past time slots for today
+      _availableTimeSlots = allTimeSlots.where((timeSlot) {
+        try {
+          // Extract the start time from the slot (e.g. "09:00 AM - 10:00 AM" -> "09:00 AM")
+          final startTimeString = timeSlot.split(' - ')[0];
+          final slotDateTime = _parseTimeToToday(startTimeString);
+
+          // Add a buffer (e.g., 30 min) to the current time to ensure users can't book appointments starting too soon
+          final bookingCutoffTime = now.add(const Duration(minutes: 30));
+
+          // Only include this slot if it starts after the cutoff time
+          return slotDateTime.isAfter(bookingCutoffTime);
+        } catch (e) {
+          // If there's an error parsing, exclude the slot to be safe
+          return false;
+        }
+      }).toList();
+    } else {
+      // For future dates, all slots are available
+      _availableTimeSlots = allTimeSlots;
+    }
+
     _selectedTimeSlot = null;
   }
 
-  // Generate time slots in one-hour increments between start and end time
+  /// Helper method to parse a time string to a DateTime for today
+  DateTime _parseTimeToToday(String timeString) {
+    final now = DateTime.now();
+    final time = _timeFormat.parse(timeString);
+    return DateTime(
+      now.year,
+      now.month,
+      now.day,
+      time.hour,
+      time.minute,
+    );
+  }
+
   List<String> _generateTimeSlots(String startTime, String endTime) {
-    final format = DateFormat('hh:mm a');
     DateTime start;
     DateTime end;
 
     try {
-      start = format.parse(startTime);
-      end = format.parse(endTime);
+      start = _timeFormat.parse(startTime);
+      end = _timeFormat.parse(endTime);
     } catch (e) {
-      // Try alternative format if parsing fails
       try {
         start = DateFormat('H:mm').parse(startTime);
         end = DateFormat('H:mm').parse(endTime);
       } catch (e) {
-        // Default fallback
         start = DateTime(2022, 1, 1, 9, 0);
         end = DateTime(2022, 1, 1, 17, 0);
       }
@@ -108,10 +130,10 @@ class _AppointmentBookingBottomSheetState
     final List<String> slots = [];
     DateTime current = start;
 
-    // Add slots in one-hour increments
     while (current.isBefore(end)) {
       final slotEnd = current.add(const Duration(hours: 1));
-      final slotText = '${format.format(current)} - ${format.format(slotEnd)}';
+      final slotText =
+          '${_timeFormat.format(current)} - ${_timeFormat.format(slotEnd)}';
       slots.add(slotText);
       current = slotEnd;
     }
@@ -120,10 +142,42 @@ class _AppointmentBookingBottomSheetState
   }
 
   bool _isAvailableDay(DateTime date) {
-    // Get the day name (e.g., "Monday")
-    final dayName = DateFormat('EEEE').format(date);
+    final dayName = _dayFormat.format(date);
 
-    // Check if this day is in the specialist's available days
+    // If it's today, only consider it available if there are available time slots left
+    if (DateUtils.isSameDay(date, DateTime.now())) {
+      final availabilityTime = widget.specialist.availableTimes.firstWhere(
+        (time) => time.day == dayName,
+        orElse: () => AvailabilityTime(
+          day: dayName,
+          startTime: '09:00 AM',
+          endTime: '05:00 PM',
+        ),
+      );
+
+      final allTimeSlots = _generateTimeSlots(
+        availabilityTime.startTime,
+        availabilityTime.endTime,
+      );
+
+      // Check if any slots are still available today
+      final now = DateTime.now();
+      final hasAvailableSlots = allTimeSlots.any((timeSlot) {
+        try {
+          final startTimeString = timeSlot.split(' - ')[0];
+          final slotDateTime = _parseTimeToToday(startTimeString);
+          return slotDateTime.isAfter(now.add(const Duration(minutes: 30)));
+        } catch (e) {
+          return false;
+        }
+      });
+
+      return widget.specialist.availableTimes
+              .any((time) => time.day == dayName) &&
+          hasAvailableSlots;
+    }
+
+    // For future dates, just check if the day is available
     return widget.specialist.availableTimes.any((time) => time.day == dayName);
   }
 
@@ -139,36 +193,24 @@ class _AppointmentBookingBottomSheetState
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           _buildHeader(),
-
-          // Content in scrollable area
           Expanded(
             child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
-                  // Specialist info
                   _buildSpecialistInfo(),
-
                   const Divider(height: 32),
-
-                  // Date selection
                   _buildDateSelection(),
-
                   const SizedBox(height: 24),
-
-                  // Time selection
                   _buildTimeSelection(),
-
                   const SizedBox(height: 24),
                 ],
               ),
             ),
           ),
-
-          // Fixed bottom button
           _buildBottomButton(),
         ],
       ),
@@ -196,33 +238,9 @@ class _AppointmentBookingBottomSheetState
 
   Widget _buildSpecialistInfo() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Stack(
-          children: [
-            CircleAvatar(
-              radius: 25,
-              backgroundImage: widget.specialist.photoUrl.isNotEmpty
-                  ? NetworkImage(widget.specialist.photoUrl)
-                  : null,
-              child: widget.specialist.photoUrl.isEmpty
-                  ? Text(widget.specialist.name[0].toUpperCase())
-                  : null,
-            ),
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: Container(
-                width: 14,
-                height: 14,
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-              ),
-            ),
-          ],
-        ),
+        _buildSpecialistAvatar(),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -234,6 +252,8 @@ class _AppointmentBookingBottomSheetState
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               Text(
                 widget.specialist.specialization,
@@ -241,29 +261,65 @@ class _AppointmentBookingBottomSheetState
                   color: Colors.grey.shade600,
                   fontSize: 14,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              '${widget.specialist.price.toInt()} EGP',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Theme.of(context).primaryColor,
-              ),
+        const SizedBox(width: 8),
+        _buildPriceInfo(),
+      ],
+    );
+  }
+
+  Widget _buildSpecialistAvatar() {
+    return Stack(
+      children: [
+        CircleAvatar(
+          radius: 25,
+          backgroundImage: widget.specialist.photoUrl.isNotEmpty
+              ? NetworkImage(widget.specialist.photoUrl)
+              : null,
+          child: widget.specialist.photoUrl.isEmpty
+              ? Text(widget.specialist.name[0].toUpperCase())
+              : null,
+        ),
+        Positioned(
+          right: 0,
+          bottom: 0,
+          child: Container(
+            width: 14,
+            height: 14,
+            decoration: BoxDecoration(
+              color: Colors.green,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2),
             ),
-            const Text(
-              'per session',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
-            ),
-          ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPriceInfo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          '${widget.specialist.price.toInt()} EGP',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: Theme.of(context).primaryColor,
+          ),
+        ),
+        const Text(
+          'per session',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+          ),
         ),
       ],
     );
@@ -281,13 +337,12 @@ class _AppointmentBookingBottomSheetState
           ),
         ),
         const SizedBox(height: 8),
-
-        // Date picker
         SizedBox(
           height: 100,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: 14, // Show 14 days
+            physics: const BouncingScrollPhysics(),
+            itemCount: 14,
             itemBuilder: (context, index) {
               final date = DateTime.now().add(Duration(days: index));
               final isAvailable = _isAvailableDay(date);
@@ -299,7 +354,7 @@ class _AppointmentBookingBottomSheetState
                 isSelected: isSelected,
                 onTap: isAvailable
                     ? () {
-                        final dayName = DateFormat('EEEE').format(date);
+                        final dayName = _dayFormat.format(date);
                         setState(() {
                           _selectedDate = date;
                           _updateAvailableTimeSlots(dayName);
@@ -322,6 +377,7 @@ class _AppointmentBookingBottomSheetState
   }) {
     final now = DateTime.now();
     final isToday = DateUtils.isSameDay(date, now);
+    final theme = Theme.of(context);
 
     return GestureDetector(
       onTap: onTap,
@@ -330,7 +386,7 @@ class _AppointmentBookingBottomSheetState
         margin: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? Theme.of(context).primaryColor.withOpacity(0.9)
+              ? theme.primaryColor.withOpacity(0.9)
               : isAvailable
                   ? Colors.white
                   : Colors.grey.shade100,
@@ -339,7 +395,7 @@ class _AppointmentBookingBottomSheetState
               ? [
                   BoxShadow(
                     color: isSelected
-                        ? Theme.of(context).primaryColor.withOpacity(0.4)
+                        ? theme.primaryColor.withOpacity(0.4)
                         : Colors.black.withOpacity(0.05),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
@@ -348,7 +404,7 @@ class _AppointmentBookingBottomSheetState
               : null,
           border: Border.all(
             color: isSelected
-                ? Theme.of(context).primaryColor
+                ? theme.primaryColor
                 : isAvailable
                     ? Colors.grey.shade300
                     : Colors.grey.shade200,
@@ -358,7 +414,7 @@ class _AppointmentBookingBottomSheetState
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              DateFormat('EEE').format(date), // Mon, Tue, etc.
+              DateFormat('EEE').format(date),
               style: TextStyle(
                 color: isSelected
                     ? Colors.white
@@ -371,7 +427,7 @@ class _AppointmentBookingBottomSheetState
             ),
             const SizedBox(height: 4),
             Text(
-              DateFormat('d').format(date), // 1, 2, etc.
+              DateFormat('d').format(date),
               style: TextStyle(
                 fontSize: 22,
                 color: isSelected
@@ -389,20 +445,18 @@ class _AppointmentBookingBottomSheetState
                 color: isToday
                     ? isSelected
                         ? Colors.white.withOpacity(0.3)
-                        : Theme.of(context).primaryColor.withOpacity(0.1)
+                        : theme.primaryColor.withOpacity(0.1)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                isToday
-                    ? 'Today'
-                    : DateFormat('MMM').format(date), // Jan, Feb, etc.
+                isToday ? 'Today' : DateFormat('MMM').format(date),
                 style: TextStyle(
                   fontSize: 10,
                   color: isSelected
                       ? Colors.white
                       : isToday
-                          ? Theme.of(context).primaryColor
+                          ? theme.primaryColor
                           : isAvailable
                               ? Colors.black
                               : Colors.grey.shade500,
@@ -419,47 +473,9 @@ class _AppointmentBookingBottomSheetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Select Time',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              DateFormat('EEEE, MMMM d').format(_selectedDate),
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: Colors.grey.shade700,
-              ),
-            ),
-          ],
-        ),
+        _buildTimeSelectionHeader(),
         const SizedBox(height: 8),
-
-        // Show working hours info
-        if (_availableTimeSlots.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Row(
-              children: [
-                Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
-                const SizedBox(width: 6),
-                Text(
-                  'Working hours: ${_availableTimeSlots.first} - ${_availableTimeSlots.last}',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-        // Time slots
+        if (_availableTimeSlots.isNotEmpty) _buildWorkingHoursInfo(),
         _availableTimeSlots.isEmpty
             ? _buildNoTimeSlotsMessage()
             : _buildTimeSlots(),
@@ -467,7 +483,73 @@ class _AppointmentBookingBottomSheetState
     );
   }
 
+  Widget _buildTimeSelectionHeader() {
+    return Row(
+      children: [
+        const Text(
+          'Select Time',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const Spacer(),
+        Flexible(
+          child: Text(
+            DateFormat('EEEE, MMM d').format(_selectedDate),
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade700,
+              fontSize: 14,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWorkingHoursInfo() {
+    // Get the actual working hours based on filtered available slots
+    String workingHoursText = "";
+
+    if (_availableTimeSlots.isNotEmpty) {
+      final firstSlotStart = _availableTimeSlots.first.split(' - ')[0];
+      final lastSlotEnd = _availableTimeSlots.last.split(' - ')[1];
+      workingHoursText = '$firstSlotStart - $lastSlotEnd';
+
+      // If today, add note about filtering
+      if (DateUtils.isSameDay(_selectedDate, DateTime.now())) {
+        workingHoursText += ' (remaining today)';
+      }
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              'Available hours: $workingHoursText',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 13,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildNoTimeSlotsMessage() {
+    final isToday = DateUtils.isSameDay(_selectedDate, DateTime.now());
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 20),
@@ -480,7 +562,9 @@ class _AppointmentBookingBottomSheetState
             ),
             const SizedBox(height: 16),
             Text(
-              'No available time slots for this day',
+              isToday
+                  ? 'No more available time slots for today'
+                  : 'No available time slots for this day',
               style: TextStyle(
                 color: Colors.grey.shade600,
                 fontStyle: FontStyle.italic,
@@ -488,7 +572,9 @@ class _AppointmentBookingBottomSheetState
             ),
             const SizedBox(height: 8),
             Text(
-              'Please select another date',
+              isToday
+                  ? 'Please select tomorrow or another date'
+                  : 'Please select another date',
               style: TextStyle(
                 color: Colors.grey.shade600,
                 fontSize: 12,
@@ -506,7 +592,6 @@ class _AppointmentBookingBottomSheetState
       runSpacing: 16,
       children: _availableTimeSlots.map((time) {
         final isSelected = _selectedTimeSlot == time;
-
         return TimeSlotWidget(
           timeSlot: time,
           isSelected: isSelected,
@@ -579,22 +664,19 @@ class _AppointmentBookingBottomSheetState
     );
   }
 
-  void _confirmBooking(BuildContext context) async {
+  Future<void> _confirmBooking(BuildContext context) async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Get the appointments repository and book without showing a loading indicator
       final appointmentsRepo = getIt<AppointmentsRepo>();
-
       await appointmentsRepo.bookAppointment(
         specialistId: widget.specialist.id,
         appointmentDate: _selectedDate,
         timeSlot: _selectedTimeSlot!,
       );
 
-      // Format date for display
       final formattedDate =
           DateFormat('EEEE, MMMM d, yyyy').format(_selectedDate);
 
@@ -602,61 +684,66 @@ class _AppointmentBookingBottomSheetState
         _isLoading = false;
       });
 
-      // Close the bottom sheet
       Navigator.of(context).pop();
-
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Row(
-                children: [
-                  Icon(
-                    Icons.check_circle,
-                    color: Colors.white,
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'Appointment Booked',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'With ${widget.specialist.name} on $formattedDate at $_selectedTimeSlot',
-              ),
-            ],
-          ),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 4),
-          action: SnackBarAction(
-            label: 'VIEW',
-            textColor: Colors.white,
-            onPressed: () {
-              // Navigate to appointments
-            },
-          ),
-        ),
-      );
+      _showSuccessMessage(context, formattedDate);
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-
-      // Show error message without closing the sheet so they can try again
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to book appointment: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showErrorMessage(context, e.toString());
     }
+  }
+
+  void _showSuccessMessage(BuildContext context, String formattedDate) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: Colors.white,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'Appointment Booked',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'With ${widget.specialist.name} on $formattedDate at $_selectedTimeSlot',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'VIEW',
+          textColor: Colors.white,
+          onPressed: () {
+            // Navigate to appointments
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showErrorMessage(BuildContext context, String errorMessage) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to book appointment: $errorMessage'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 }
