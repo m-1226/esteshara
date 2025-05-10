@@ -1,6 +1,7 @@
 // features/appointments/presentation/widgets/appointment_card.dart
 import 'package:esteshara/core/models/appointment_model.dart';
 import 'package:esteshara/core/services/setup_service_locator.dart';
+import 'package:esteshara/core/utils/app_styles.dart';
 import 'package:esteshara/features/appointments/presentation/views/widgets/appointment_utils.dart';
 import 'package:esteshara/features/appointments/presentation/views/widgets/spcialist_info_widget.dart';
 import 'package:esteshara/features/home/data/cubits/get_specialist/get_specialist_cubit.dart';
@@ -97,9 +98,8 @@ class AppointmentCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               'Cannot cancel (cancellation deadline has passed)',
-                              style: TextStyle(
+                              style: AppStyles.notoKufiNormalStyle14.copyWith(
                                 color: Colors.orange.shade700,
-                                fontSize: 12,
                                 fontStyle: FontStyle.italic,
                               ),
                             ),
@@ -125,9 +125,8 @@ class AppointmentCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               'Rescheduling window (2 hours from booking) has expired',
-                              style: TextStyle(
+                              style: AppStyles.notoKufiNormalStyle14.copyWith(
                                 color: Colors.grey.shade700,
-                                fontSize: 12,
                                 fontStyle: FontStyle.italic,
                               ),
                             ),
@@ -151,9 +150,8 @@ class AppointmentCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               'Rescheduling window: ${appointment.getRescheduleTimeRemaining()}',
-                              style: TextStyle(
+                              style: AppStyles.notoKufiNormalStyle14.copyWith(
                                 color: Colors.green.shade700,
-                                fontSize: 12,
                                 fontStyle: FontStyle.italic,
                               ),
                             ),
@@ -176,10 +174,9 @@ class AppointmentCard extends StatelessWidget {
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              _getCancellationDeadlineText(), // Using the function to get properly formatted text
-                              style: TextStyle(
+                              _getCancellationDeadlineText(),
+                              style: AppStyles.notoKufiNormalStyle14.copyWith(
                                 color: Colors.blue.shade700,
-                                fontSize: 12,
                                 fontStyle: FontStyle.italic,
                               ),
                             ),
@@ -197,8 +194,6 @@ class AppointmentCard extends StatelessWidget {
   }
 
   // Get formatted cancellation deadline text based on the rules
-// Replace this method in the AppointmentCard class
-
   String _getCancellationDeadlineText() {
     // Get appointment start time from the time slot (e.g., "9:00 AM - 10:00 AM")
     final timeSlotParts = appointment.timeSlot.split(' - ');
@@ -295,8 +290,7 @@ class AppointmentCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 dateText,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                style: AppStyles.bold16.copyWith(
                   color:
                       isUpcoming ? Colors.blue.shade700 : Colors.grey.shade700,
                 ),
@@ -326,10 +320,9 @@ class AppointmentCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   statusText,
-                  style: TextStyle(
+                  style: AppStyles.notoKufiNormalStyle14.copyWith(
                     color: statusColor,
                     fontWeight: FontWeight.w500,
-                    fontSize: 12,
                   ),
                 ),
               ],
@@ -396,15 +389,11 @@ class AppointmentCard extends StatelessWidget {
               children: [
                 Text(
                   startTime,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppStyles.bold18,
                 ),
                 Text(
                   'to $endTime ($durationText)',
-                  style: TextStyle(
-                    fontSize: 14,
+                  style: AppStyles.notoKufiNormalStyle14.copyWith(
                     color: Colors.grey.shade600,
                   ),
                 ),
@@ -429,8 +418,7 @@ class AppointmentCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(
                       'In $remainingText',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: AppStyles.notoKufiNormalStyle14.copyWith(
                         fontWeight: FontWeight.w500,
                         color: hours < 6 ? Colors.red : Colors.green,
                       ),
@@ -487,8 +475,7 @@ class AppointmentCard extends StatelessWidget {
           Expanded(
             child: Text(
               'Last modified: $formattedDate',
-              style: TextStyle(
-                fontSize: 12,
+              style: AppStyles.notoKufiNormalStyle14.copyWith(
                 color: Colors.grey.shade600,
                 fontStyle: FontStyle.italic,
               ),
@@ -526,8 +513,7 @@ class AppointmentCard extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 '${specialist.price.toInt()} EGP',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                style: AppStyles.bold16.copyWith(
                   color: Theme.of(context).primaryColor,
                 ),
               ),
@@ -552,13 +538,12 @@ class AppointmentCard extends StatelessWidget {
           children: [
             const Text(
               'Specialist unavailable',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: AppStyles.bold16,
             ),
             Text(
               'ID: ${appointment.specialistId}',
-              style: TextStyle(
+              style: AppStyles.notoKufiNormalStyle14.copyWith(
                 color: Colors.grey.shade600,
-                fontSize: 12,
               ),
             ),
           ],
@@ -589,7 +574,10 @@ class AppointmentCard extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: () => onReschedulePressed!(appointment),
               icon: const Icon(Icons.edit_calendar, size: 16),
-              label: const Text('Reschedule'),
+              label: const Text(
+                'Reschedule',
+                style: AppStyles.bold14,
+              ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.blue,
                 side: const BorderSide(color: Colors.blue),
@@ -611,7 +599,10 @@ class AppointmentCard extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: () => onCancelPressed!(appointment.id),
               icon: const Icon(Icons.cancel_outlined, size: 16),
-              label: const Text('Cancel'),
+              label: const Text(
+                'Cancel',
+                style: AppStyles.bold14,
+              ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.red,
                 side: const BorderSide(color: Colors.red),
