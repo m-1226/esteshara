@@ -5,6 +5,7 @@ import 'package:esteshara/core/models/user_model.dart';
 import 'package:esteshara/core/services/firebase_service.dart';
 import 'package:esteshara/core/services/setup_service_locator.dart';
 import 'package:esteshara/features/appointments/data/repos/appointments/appointments_repo.dart';
+import 'package:esteshara/features/home/data/manager/time_conflict_helper.dart';
 import 'package:esteshara/features/home/data/models/availabitily_time.dart';
 import 'package:esteshara/features/home/data/models/specialist_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 /// Manager class that handles all business logic for booking appointments.
-/// Separates logic from UI for better maintainability.
 class BookingManager {
   // Dependencies
   final SpecialistModel specialist;
@@ -31,7 +31,6 @@ class BookingManager {
 
   // Formatters
   final DateFormat _dayFormat = DateFormat('EEEE');
-  final DateFormat _timeFormat = DateFormat('hh:mm a');
 
   // Constructor
   BookingManager({
@@ -99,10 +98,11 @@ class BookingManager {
 
   // Check if the user already has an appointment with this specialist
   void _checkForExistingAppointmentWithSpecialist() {
-    _hasExistingAppointmentWithSpecialist = _userAppointments.any(
-        (appointment) =>
-            appointment.specialistId == specialist.id &&
-            appointment.status == 'scheduled');
+    _hasExistingAppointmentWithSpecialist =
+        TimeConflictHelper.hasExistingAppointmentWithSpecialist(
+      specialistId: specialist.id,
+      userAppointments: _userAppointments,
+    );
 
     // If user has an existing appointment, show error message
     if (_hasExistingAppointmentWithSpecialist) {
@@ -149,31 +149,14 @@ class BookingManager {
       ),
     );
 
-    // Generate all time slots
-    List<String> allTimeSlots = _generateTimeSlots(
-      availabilityTime.startTime,
-      availabilityTime.endTime,
+    // Use TimeConflictHelper to generate available time slots
+    // This filters out slots that conflict with existing appointments
+    _availableTimeSlots = TimeConflictHelper.generateAvailableTimeSlots(
+      date: _selectedDate,
+      startTime: availabilityTime.startTime,
+      endTime: availabilityTime.endTime,
+      userAppointments: _userAppointments,
     );
-
-    // Filter slots for today
-    List<String> filteredSlots = allTimeSlots;
-    if (DateUtils.isSameDay(_selectedDate, DateTime.now())) {
-      final now = DateTime.now();
-      filteredSlots = allTimeSlots.where((timeSlot) {
-        try {
-          final startTimeString = timeSlot.split(' - ')[0];
-          final slotDateTime = _parseTimeToToday(startTimeString);
-          return slotDateTime.isAfter(now.add(const Duration(minutes: 30)));
-        } catch (e) {
-          return false;
-        }
-      }).toList();
-    }
-
-    // Filter out slots with conflicts
-    _availableTimeSlots = filteredSlots.where((timeSlot) {
-      return !_hasAppointmentConflict(_selectedDate, timeSlot);
-    }).toList();
 
     _selectedTimeSlot = null;
   }
@@ -202,40 +185,12 @@ class BookingManager {
 
     final dayName = _dayFormat.format(date);
 
-    // Special handling for today
-    if (DateUtils.isSameDay(date, DateTime.now())) {
-      final availabilityTime = specialist.availableTimes.firstWhere(
-        (time) => time.day == dayName,
-        orElse: () => AvailabilityTime(
-          day: dayName,
-          startTime: '09:00 AM',
-          endTime: '05:00 PM',
-        ),
-      );
-
-      final allTimeSlots = _generateTimeSlots(
-        availabilityTime.startTime,
-        availabilityTime.endTime,
-      );
-
-      // Check if any slots are still available today
-      final now = DateTime.now();
-      final hasAvailableSlots = allTimeSlots.any((timeSlot) {
-        try {
-          final startTimeString = timeSlot.split(' - ')[0];
-          final slotDateTime = _parseTimeToToday(startTimeString);
-          return slotDateTime.isAfter(now.add(const Duration(minutes: 30))) &&
-              !_hasAppointmentConflict(date, timeSlot);
-        } catch (e) {
-          return false;
-        }
-      });
-
-      return specialist.availableTimes.any((time) => time.day == dayName) &&
-          hasAvailableSlots;
+    // Check if the day is in the specialist's available days
+    if (!specialist.availableTimes.any((time) => time.day == dayName)) {
+      return false;
     }
 
-    // For future dates
+    // Get the availability time for this day
     final availabilityTime = specialist.availableTimes.firstWhere(
       (time) => time.day == dayName,
       orElse: () => AvailabilityTime(
@@ -245,22 +200,22 @@ class BookingManager {
       ),
     );
 
-    final allTimeSlots = _generateTimeSlots(
-      availabilityTime.startTime,
-      availabilityTime.endTime,
+    // Generate time slots and check if any are available after conflict filtering
+    final availableSlots = TimeConflictHelper.generateAvailableTimeSlots(
+      date: date,
+      startTime: availabilityTime.startTime,
+      endTime: availabilityTime.endTime,
+      userAppointments: _userAppointments,
     );
 
-    // Check if there's at least one slot without conflict
-    final hasAvailableSlot = allTimeSlots
-        .any((timeSlot) => !_hasAppointmentConflict(date, timeSlot));
-
-    return specialist.availableTimes.any((time) => time.day == dayName) &&
-        hasAvailableSlot;
+    return availableSlots.isNotEmpty;
   }
 
   // Check if user has conflicting appointments on a day
   bool hasConflictingAppointmentsOnDay(DateTime date) {
     final dayName = _dayFormat.format(date);
+
+    // Get specialist's availability for this day
     final availabilityTime = specialist.availableTimes.firstWhere(
       (time) => time.day == dayName,
       orElse: () => AvailabilityTime(
@@ -270,14 +225,17 @@ class BookingManager {
       ),
     );
 
-    final allTimeSlots = _generateTimeSlots(
-      availabilityTime.startTime,
-      availabilityTime.endTime,
-    );
+    // Generate all possible time slots
+    final allTimeSlots = TimeConflictHelper.generateTimeSlots(
+        availabilityTime.startTime, availabilityTime.endTime);
 
     // Check if all slots have conflicts
-    final allHaveConflicts = allTimeSlots
-        .every((timeSlot) => _hasAppointmentConflict(date, timeSlot));
+    final allHaveConflicts = allTimeSlots.every(
+        (timeSlot) => TimeConflictHelper.hasConflictWithExistingAppointments(
+              date: date,
+              timeSlot: timeSlot,
+              existingAppointments: _userAppointments,
+            ));
 
     // Check if there are any appointments on this day
     final hasAppointmentsOnDay = _userAppointments.any((appointment) =>
@@ -300,7 +258,11 @@ class BookingManager {
     }
 
     // Double-check for conflicts before confirming
-    if (_hasAppointmentConflict(_selectedDate, _selectedTimeSlot!)) {
+    if (TimeConflictHelper.hasConflictWithExistingAppointments(
+      date: _selectedDate,
+      timeSlot: _selectedTimeSlot!,
+      existingAppointments: _userAppointments,
+    )) {
       _errorMessage =
           'This time slot is no longer available - you may have a conflicting appointment';
 
@@ -342,112 +304,6 @@ class BookingManager {
       _notifyStateChanged();
       return false;
     }
-  }
-
-  // Helper to check for appointment conflicts
-  bool _hasAppointmentConflict(DateTime date, String timeSlot) {
-    // Only check conflicts for active appointments
-    final activeAppointments = _userAppointments
-        .where((appointment) => appointment.status == 'scheduled')
-        .toList();
-
-    if (activeAppointments.isEmpty) return false;
-
-    // Parse time slot
-    final timeRange = timeSlot.split(' - ');
-    final slotStartTime = _parseTimeString(timeRange[0]);
-    final slotEndTime = _parseTimeString(timeRange[1]);
-
-    // Create full DateTime objects for potential appointment
-    final slotStartDateTime = DateTime(date.year, date.month, date.day,
-        slotStartTime.hour, slotStartTime.minute);
-    final slotEndDateTime = DateTime(
-        date.year, date.month, date.day, slotEndTime.hour, slotEndTime.minute);
-
-    // Check for overlaps with existing appointments
-    for (final appointment in activeAppointments) {
-      if (DateUtils.isSameDay(appointment.appointmentDate, date)) {
-        try {
-          // Parse the appointment time slot
-          final appointmentTimeRange = appointment.timeSlot.split(' - ');
-          final appointmentStartTime =
-              _parseTimeString(appointmentTimeRange[0]);
-          final appointmentEndTime = _parseTimeString(appointmentTimeRange[1]);
-
-          // Create DateTime objects for existing appointment
-          final appointmentStartDateTime = DateTime(date.year, date.month,
-              date.day, appointmentStartTime.hour, appointmentStartTime.minute);
-          final appointmentEndDateTime = DateTime(date.year, date.month,
-              date.day, appointmentEndTime.hour, appointmentEndTime.minute);
-
-          // Check for overlap
-          if ((slotStartDateTime.isBefore(appointmentEndDateTime) ||
-                  slotStartDateTime.isAtSameMomentAs(appointmentEndDateTime)) &&
-              (slotEndDateTime.isAfter(appointmentStartDateTime) ||
-                  slotEndDateTime.isAtSameMomentAs(appointmentStartDateTime))) {
-            return true; // Overlap detected
-          }
-        } catch (e) {
-          debugPrint('Error parsing appointment time: $e');
-        }
-      }
-    }
-
-    return false;
-  }
-
-  // Helper method to generate time slots
-  List<String> _generateTimeSlots(String startTime, String endTime) {
-    DateTime start;
-    DateTime end;
-
-    try {
-      start = _timeFormat.parse(startTime);
-      end = _timeFormat.parse(endTime);
-    } catch (e) {
-      try {
-        start = DateFormat('H:mm').parse(startTime);
-        end = DateFormat('H:mm').parse(endTime);
-      } catch (e) {
-        start = DateTime(2022, 1, 1, 9, 0);
-        end = DateTime(2022, 1, 1, 17, 0);
-      }
-    }
-
-    final List<String> slots = [];
-    DateTime current = start;
-
-    while (current.isBefore(end)) {
-      final slotEnd = current.add(const Duration(hours: 1));
-      final slotText =
-          '${_timeFormat.format(current)} - ${_timeFormat.format(slotEnd)}';
-      slots.add(slotText);
-      current = slotEnd;
-    }
-
-    return slots;
-  }
-
-  // Helper to parse time string to TimeOfDay
-  TimeOfDay _parseTimeString(String timeString) {
-    try {
-      final dateTime = _timeFormat.parse(timeString);
-      return TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
-    } catch (e) {
-      try {
-        final dateTime = DateFormat('H:mm').parse(timeString);
-        return TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
-      } catch (e) {
-        return const TimeOfDay(hour: 9, minute: 0);
-      }
-    }
-  }
-
-  // Helper to parse time to today's date
-  DateTime _parseTimeToToday(String timeString) {
-    final now = DateTime.now();
-    final time = _timeFormat.parse(timeString);
-    return DateTime(now.year, now.month, now.day, time.hour, time.minute);
   }
 
   // Notify state change
