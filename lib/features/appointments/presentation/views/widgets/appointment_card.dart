@@ -96,7 +96,7 @@ class AppointmentCard extends StatelessWidget {
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              'Cannot cancel (less than 6 hours before appointment)',
+                              'Cannot cancel (cancellation deadline has passed)',
                               style: TextStyle(
                                 color: Colors.orange.shade700,
                                 fontSize: 12,
@@ -162,7 +162,7 @@ class AppointmentCard extends StatelessWidget {
                       ),
                     ),
 
-                  // Clarification about cancellation policy
+                  // Cancellation deadline info
                   if (isUpcoming && appointment.canCancel())
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
@@ -176,7 +176,7 @@ class AppointmentCard extends StatelessWidget {
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              'Cancellation available until 2 hours before appointment time',
+                              _getCancellationDeadlineText(), // Using the function to get properly formatted text
                               style: TextStyle(
                                 color: Colors.blue.shade700,
                                 fontSize: 12,
@@ -194,6 +194,66 @@ class AppointmentCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Get formatted cancellation deadline text based on the rules
+  String _getCancellationDeadlineText() {
+    // Get appointment start time from the time slot (e.g., "9:00 AM - 10:00 AM")
+    final timeSlotParts = appointment.timeSlot.split(' - ');
+    final startTimeStr = timeSlotParts.isNotEmpty ? timeSlotParts[0] : '';
+
+    // Parse appointment start time
+    final DateFormat timeFormat = DateFormat('hh:mm a');
+    DateTime? appointmentStartDateTime;
+
+    try {
+      final startTime = timeFormat.parse(startTimeStr);
+      appointmentStartDateTime = DateTime(
+        appointment.appointmentDate.year,
+        appointment.appointmentDate.month,
+        appointment.appointmentDate.day,
+        startTime.hour,
+        startTime.minute,
+      );
+    } catch (e) {
+      // Fallback if parsing fails
+      appointmentStartDateTime = appointment.appointmentDate;
+    }
+
+    // Calculate cancellation deadline (2 hours before appointment)
+    final cancellationDeadline =
+        appointmentStartDateTime.subtract(const Duration(hours: 2));
+
+    // Calculate today's 7 PM cutoff
+    final now = DateTime.now();
+    final cutoffToday = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      19, // 7 PM
+      0,
+    );
+
+    // Use the earlier deadline of the two
+    final effectiveDeadline = cancellationDeadline.isBefore(cutoffToday)
+        ? cancellationDeadline
+        : cutoffToday;
+
+    // Format the date in a user-friendly way
+    final deadlineFormat = DateFormat('h:mm a');
+    final dateFormat = DateFormat('EEEE, MMMM d');
+
+    final isToday = DateUtils.isSameDay(effectiveDeadline, now);
+    final formattedTime = deadlineFormat.format(effectiveDeadline);
+
+    if (isToday) {
+      // If deadline is today, just show the time
+      return 'Cancellation available until $formattedTime today';
+    } else {
+      // Otherwise show date and time
+      final formattedDate = dateFormat.format(effectiveDeadline);
+      return 'Cancellation available until $formattedTime on $formattedDate';
+    }
   }
 
   Widget _buildDateHeader(BuildContext context, bool isToday, bool isTomorrow) {
