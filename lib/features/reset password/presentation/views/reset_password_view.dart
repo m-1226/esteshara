@@ -13,7 +13,7 @@ class ResetPasswordView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('إستعادة كلمة المرور'),
+        title: const Text('Reset Password'),
       ),
       body: BlocProvider(
         create: (context) => ResetPasswordCubit(),
@@ -21,7 +21,7 @@ class ResetPasswordView extends StatelessWidget {
           listener: (context, state) {
             if (state is ResetPasswordSuccess) {
               customSuccessMessage(
-                title: 'تم إرسال بريد إستعادة كلمة المرور ',
+                title: 'Password reset email sent successfully',
               );
             } else if (state is ResetPasswordFailure) {
               customErrorMessage(title: state.errMessage);

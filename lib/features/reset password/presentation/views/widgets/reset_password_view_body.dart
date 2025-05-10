@@ -1,10 +1,8 @@
-import 'package:esteshara/core/utils/app_assets.dart';
-import 'package:esteshara/core/widgets/custom_button.dart';
-import 'package:esteshara/core/widgets/custom_text_form_field.dart';
-import 'package:esteshara/features/reset%20password/data/cubits/reset_password/reset_password_cubit.dart';
-import 'package:esteshara/features/reset%20password/data/cubits/reset_password/reset_password_states.dart';
+import 'package:esteshara/features/auth/presentation/views/login/widgets/email_field.dart';
+import 'package:esteshara/features/reset%20password/presentation/views/widgets/reset_password_button_bloc_builder.dart';
+import 'package:esteshara/features/reset%20password/presentation/views/widgets/reset_password_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gap/gap.dart';
 
 class ResetPasswordViewBody extends StatefulWidget {
   const ResetPasswordViewBody({super.key});
@@ -37,48 +35,12 @@ class _ResetPasswordViewBodyState extends State<ResetPasswordViewBody> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Image.asset(
-              Assets.imagesResetPassword,
-              width: 170,
-              height: 170,
-            ),
-            const SizedBox(
-              height: 25,
-            ),
-            CustomTextFormField(
-              hintText: 'إكتب الإيميل المسجل علي التطبيق',
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'يرجى كتابة الإيميل';
-                } else if (!RegExp(
-                        r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
-                    .hasMatch(value)) {
-                  return 'يرجي الإيميل بشكل صحيح';
-                }
-                return null;
-              },
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              prefixIcon: const Icon(Icons.email),
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            BlocBuilder<ResetPasswordCubit, ResetPasswordState>(
-              builder: (context, state) {
-                return CustomButton(
-                  isLoading: state is ResetPasswordLoading ? true : false,
-                  buttonText: 'إستعادة كلمة المرور',
-                  onPressed: () {
-                    final email = emailController.text;
-                    if (formKey.currentState!.validate()) {
-                      BlocProvider.of<ResetPasswordCubit>(context)
-                          .resetPassword(email);
-                    }
-                  },
-                );
-              },
-            ),
+            ResetPasswordImage(),
+            Gap(25),
+            EmailField(emailController: emailController),
+            Gap(15),
+            ResetPasswordButtonBlocBuilder(
+                emailController: emailController, formKey: formKey),
           ],
         ),
       ),
