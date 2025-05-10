@@ -197,6 +197,8 @@ class AppointmentCard extends StatelessWidget {
   }
 
   // Get formatted cancellation deadline text based on the rules
+// Replace this method in the AppointmentCard class
+
   String _getCancellationDeadlineText() {
     // Get appointment start time from the time slot (e.g., "9:00 AM - 10:00 AM")
     final timeSlotParts = appointment.timeSlot.split(' - ');
@@ -224,34 +226,26 @@ class AppointmentCard extends StatelessWidget {
     final cancellationDeadline =
         appointmentStartDateTime.subtract(const Duration(hours: 2));
 
-    // Calculate today's 7 PM cutoff
-    final now = DateTime.now();
-    final cutoffToday = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      19, // 7 PM
-      0,
-    );
-
-    // Use the earlier deadline of the two
-    final effectiveDeadline = cancellationDeadline.isBefore(cutoffToday)
-        ? cancellationDeadline
-        : cutoffToday;
-
     // Format the date in a user-friendly way
     final deadlineFormat = DateFormat('h:mm a');
     final dateFormat = DateFormat('EEEE, MMMM d');
 
-    final isToday = DateUtils.isSameDay(effectiveDeadline, now);
-    final formattedTime = deadlineFormat.format(effectiveDeadline);
+    final now = DateTime.now();
+    final isToday = DateUtils.isSameDay(cancellationDeadline, now);
+    final isTomorrow = DateUtils.isSameDay(
+        cancellationDeadline, now.add(const Duration(days: 1)));
+
+    final formattedTime = deadlineFormat.format(cancellationDeadline);
 
     if (isToday) {
       // If deadline is today, just show the time
       return 'Cancellation available until $formattedTime today';
+    } else if (isTomorrow) {
+      // If deadline is tomorrow
+      return 'Cancellation available until $formattedTime tomorrow';
     } else {
-      // Otherwise show date and time
-      final formattedDate = dateFormat.format(effectiveDeadline);
+      // Otherwise show full date and time
+      final formattedDate = dateFormat.format(cancellationDeadline);
       return 'Cancellation available until $formattedTime on $formattedDate';
     }
   }
