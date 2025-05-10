@@ -1,3 +1,5 @@
+import 'package:esteshara/core/services/setup_service_locator.dart';
+import 'package:esteshara/features/appointments/data/repos/appointments/appointments_repo.dart';
 import 'package:esteshara/features/profile/presentation/views/widgets/profile_stats_card.dart';
 import 'package:flutter/material.dart';
 
@@ -11,53 +13,63 @@ class ProfileStatsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stats = _calculateStats();
+    // Get appointments repo from service locator
+    final appointmentsRepo = getIt<AppointmentsRepo>();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: ProfileStatsCard(
-              icon: Icons.check_circle_outline,
-              title: 'Completed',
-              value: stats.completedAppointments.toString(),
-              color: Colors.green,
-            ),
+    // Use stream for real-time updates
+    return StreamBuilder(
+      stream: appointmentsRepo.getAppointmentsStream(),
+      builder: (context, snapshot) {
+        final stats = _calculateStats(snapshot.data);
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: ProfileStatsCard(
+                  icon: Icons.check_circle_outline,
+                  title: 'Completed',
+                  value: stats.completedAppointments.toString(),
+                  color: Colors.green,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ProfileStatsCard(
+                  icon: Icons.calendar_today,
+                  title: 'Upcoming',
+                  value: stats.upcomingAppointments.toString(),
+                  color: Colors.blue,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ProfileStatsCard(
+                  icon: Icons.savings_outlined,
+                  title: 'Saved',
+                  value: '${stats.savedMoney.toInt()} EGP',
+                  color: Colors.purple,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: ProfileStatsCard(
-              icon: Icons.calendar_today,
-              title: 'Upcoming',
-              value: stats.upcomingAppointments.toString(),
-              color: Colors.blue,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: ProfileStatsCard(
-              icon: Icons.savings_outlined,
-              title: 'Saved',
-              value: '${stats.savedMoney.toInt()} EGP',
-              color: Colors.purple,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  _ProfileStats _calculateStats() {
+  _ProfileStats _calculateStats(dynamic appointmentsData) {
     int completedAppointments = 0;
     int upcomingAppointments = 0;
     double savedMoney = 0.0;
 
-    // Check if appointments field exists and is properly formatted
-    if (userModel.appointments != null && userModel.appointments is List) {
-      final now = DateTime.now();
+    // Use appointments from stream if available, otherwise fall back to userModel
+    final appointments = appointmentsData ?? userModel.appointments;
 
-      for (var appointment in userModel.appointments) {
+    if (appointments != null && appointments is List) {
+      final now = DateTime.now();
+      for (var appointment in appointments) {
         if (appointment.status == 'completed') {
           completedAppointments++;
         } else if (appointment.status == 'scheduled') {
@@ -71,7 +83,6 @@ class ProfileStatsSection extends StatelessWidget {
           }
         }
       }
-
       // This is just a placeholder calculation for saved money
       savedMoney = completedAppointments * 50.0;
     }
