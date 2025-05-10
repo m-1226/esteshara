@@ -162,18 +162,10 @@ class IntroductionViewBody extends StatelessWidget {
       image: Padding(
         padding: const EdgeInsets.only(top: 20), // Reduced padding
         child: Lottie.asset(
-          'assets/animations/health_animation.json', // Replaced with Lottie animation
+          'assets/animations/get_started.json', // Replaced with Lottie animation
           width: 280,
           height: 280,
           fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            // Fallback to icon if animation isn't available
-            return Icon(
-              Icons.health_and_safety,
-              size: 120,
-              color: Theme.of(context).primaryColor,
-            );
-          },
         ),
       ),
       decoration: _buildPageDecoration(),
