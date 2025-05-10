@@ -5,6 +5,7 @@ import 'package:esteshara/core/models/user_model.dart';
 import 'package:esteshara/core/services/firebase_service.dart';
 import 'package:esteshara/core/services/setup_service_locator.dart';
 import 'package:esteshara/features/appointments/data/repos/appointments/appointments_repo.dart';
+import 'package:esteshara/features/home/data/models/availabitily_time.dart';
 import 'package:esteshara/features/home/data/models/specialist_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ class BookingManager {
   List<String> _availableTimeSlots = [];
   List<AppointmentModel> _userAppointments = [];
   String _errorMessage = '';
+  bool _hasExistingAppointmentWithSpecialist = false;
 
   // Formatters
   final DateFormat _dayFormat = DateFormat('EEEE');
@@ -45,7 +47,10 @@ class BookingManager {
   String? get selectedTimeSlot => _selectedTimeSlot;
   List<String> get availableTimeSlots => _availableTimeSlots;
   String get errorMessage => _errorMessage;
-  bool get canConfirmBooking => _selectedTimeSlot != null;
+  bool get canConfirmBooking =>
+      _selectedTimeSlot != null && !_hasExistingAppointmentWithSpecialist;
+  bool get hasExistingAppointmentWithSpecialist =>
+      _hasExistingAppointmentWithSpecialist;
 
   // Initialize
   Future<void> initialize() async {
@@ -75,6 +80,9 @@ class BookingManager {
         if (userDoc.exists) {
           final userData = UserModel.fromDocumentSnapshot(userDoc);
           _userAppointments = userData.appointments;
+
+          // Check if user already has an active appointment with this specialist
+          _checkForExistingAppointmentWithSpecialist();
         }
       }
 
@@ -86,6 +94,20 @@ class BookingManager {
       _isLoading = false;
       _notifyStateChanged();
       _findNextAvailableDay();
+    }
+  }
+
+  // Check if the user already has an appointment with this specialist
+  void _checkForExistingAppointmentWithSpecialist() {
+    _hasExistingAppointmentWithSpecialist = _userAppointments.any(
+        (appointment) =>
+            appointment.specialistId == specialist.id &&
+            appointment.status == 'scheduled');
+
+    // If user has an existing appointment, show error message
+    if (_hasExistingAppointmentWithSpecialist) {
+      _errorMessage =
+          'You already have an appointment with this specialist. Please cancel or reschedule it before booking another one.';
     }
   }
 
@@ -110,6 +132,14 @@ class BookingManager {
 
   // Update available time slots based on selected date
   void _updateAvailableTimeSlots(String dayName) {
+    // If user already has an appointment with this specialist,
+    // don't bother calculating available time slots
+    if (_hasExistingAppointmentWithSpecialist) {
+      _availableTimeSlots = [];
+      _selectedTimeSlot = null;
+      return;
+    }
+
     final availabilityTime = specialist.availableTimes.firstWhere(
       (time) => time.day == dayName,
       orElse: () => AvailabilityTime(
@@ -164,6 +194,12 @@ class BookingManager {
 
   // Check if a date is available for booking
   bool isDateAvailable(DateTime date) {
+    // If user already has an appointment with this specialist,
+    // don't allow selecting any dates
+    if (_hasExistingAppointmentWithSpecialist) {
+      return false;
+    }
+
     final dayName = _dayFormat.format(date);
 
     // Special handling for today
@@ -255,6 +291,14 @@ class BookingManager {
   Future<bool> confirmBooking() async {
     if (_selectedTimeSlot == null) return false;
 
+    // If user already has an appointment with this specialist, prevent booking
+    if (_hasExistingAppointmentWithSpecialist) {
+      _errorMessage =
+          'You already have an appointment with this specialist. Please cancel or reschedule it before booking another one.';
+      _notifyStateChanged();
+      return false;
+    }
+
     // Double-check for conflicts before confirming
     if (_hasAppointmentConflict(_selectedDate, _selectedTimeSlot!)) {
       _errorMessage =
@@ -287,6 +331,7 @@ class BookingManager {
       );
 
       _userAppointments.add(newAppointment);
+      _hasExistingAppointmentWithSpecialist = true; // Update this flag
       _isSubmitting = false;
       _notifyStateChanged();
 

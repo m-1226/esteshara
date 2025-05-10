@@ -9,16 +9,15 @@ class AvailabilityTime {
     required this.endTime,
   });
 
-  // Add factory methods for JSON serialization if needed
-  factory AvailabilityTime.fromJson(Map<String, dynamic> json) {
+  factory AvailabilityTime.fromMap(Map<String, dynamic> map) {
     return AvailabilityTime(
-      day: json['day'] ?? '',
-      startTime: json['startTime'] ?? '09:00 AM',
-      endTime: json['endTime'] ?? '05:00 PM',
+      day: map['day'] ?? '',
+      startTime: map['startTime'] ?? '',
+      endTime: map['endTime'] ?? '',
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'day': day,
       'startTime': startTime,

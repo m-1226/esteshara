@@ -8,6 +8,7 @@ import 'package:esteshara/features/home/presentation/views/home_view.dart';
 import 'package:esteshara/features/home/presentation/views/specialist_details_view.dart';
 import 'package:esteshara/features/introduction/presentation/views/introduction_view.dart';
 import 'package:esteshara/features/profile/presentation/views/profile_view.dart';
+import 'package:esteshara/features/reset%20password/presentation/views/reset_password_view.dart';
 import 'package:esteshara/features/splash/presentation/views/splash_view.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +24,7 @@ abstract class AppRouters {
   static const String kProfileView = '/profile';
   static const String kLoginView = '/login';
   static const String kSignupView = '/signup';
+  static const String kResetPasswordView = '/resetPassword';
 
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
@@ -38,6 +40,10 @@ abstract class AppRouters {
       GoRoute(
         path: kIntroductionView,
         builder: (context, state) => const IntroductionView(),
+      ),
+      GoRoute(
+        path: kResetPasswordView,
+        builder: (context, state) => const ResetPasswordView(),
       ),
       GoRoute(
         path: kLoginView,

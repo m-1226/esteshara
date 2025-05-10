@@ -1,15 +1,18 @@
 // features/specialists/presentation/widgets/appointment_booking_bottom_sheet.dart
 import 'package:esteshara/core/services/setup_service_locator.dart';
+import 'package:esteshara/core/utils/app_routers.dart';
 import 'package:esteshara/features/appointments/data/repos/appointments/appointments_repo.dart';
 import 'package:esteshara/features/home/data/manager/booking_manager.dart';
 import 'package:esteshara/features/home/data/models/specialist_model.dart';
 import 'package:esteshara/features/home/presentation/views/widgets/booking_confirmation_button.dart';
 import 'package:esteshara/features/home/presentation/views/widgets/booking_header.dart';
 import 'package:esteshara/features/home/presentation/views/widgets/date_selection_section.dart';
+import 'package:esteshara/features/home/presentation/views/widgets/exisiting_appointment_warning.dart';
 import 'package:esteshara/features/home/presentation/views/widgets/loading_view.dart';
 import 'package:esteshara/features/home/presentation/views/widgets/specialist_info_section.dart';
 import 'package:esteshara/features/home/presentation/views/widgets/time_selection_section.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class AppointmentBookingBottomSheet extends StatefulWidget {
@@ -74,20 +77,37 @@ class _AppointmentBookingBottomSheetState
                   const SizedBox(height: 16),
                   SpecialistInfoSection(specialist: widget.specialist),
                   const Divider(height: 32),
-                  DateSelectionSection(
-                    selectedDate: _bookingManager.selectedDate,
-                    onDateSelected: _bookingManager.updateSelectedDate,
-                    isDateAvailable: _bookingManager.isDateAvailable,
-                  ),
-                  const SizedBox(height: 24),
-                  TimeSelectionSection(
-                    selectedDate: _bookingManager.selectedDate,
-                    availableTimeSlots: _bookingManager.availableTimeSlots,
-                    selectedTimeSlot: _bookingManager.selectedTimeSlot,
-                    onTimeSelected: _bookingManager.selectTimeSlot,
-                    hasConflicts:
-                        _bookingManager.hasConflictingAppointmentsOnDay,
-                  ),
+
+                  // Show warning if user already has an appointment with this specialist
+                  if (_bookingManager.hasExistingAppointmentWithSpecialist)
+                    ExistingAppointmentWarning(
+                      message: _bookingManager.errorMessage,
+                      onViewAppointments: () {
+                        context.pop();
+                        context.push(AppRouters.kAppointmentsView);
+                      },
+                    )
+                  else
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        DateSelectionSection(
+                          selectedDate: _bookingManager.selectedDate,
+                          onDateSelected: _bookingManager.updateSelectedDate,
+                          isDateAvailable: _bookingManager.isDateAvailable,
+                        ),
+                        const SizedBox(height: 24),
+                        TimeSelectionSection(
+                          selectedDate: _bookingManager.selectedDate,
+                          availableTimeSlots:
+                              _bookingManager.availableTimeSlots,
+                          selectedTimeSlot: _bookingManager.selectedTimeSlot,
+                          onTimeSelected: _bookingManager.selectTimeSlot,
+                          hasConflicts:
+                              _bookingManager.hasConflictingAppointmentsOnDay,
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: 24),
                 ],
               ),
@@ -119,8 +139,7 @@ class _AppointmentBookingBottomSheetState
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-              'Failed to book appointment: ${_bookingManager.errorMessage}'),
+          content: Text(_bookingManager.errorMessage),
           backgroundColor: Colors.red,
         ),
       );
@@ -158,7 +177,7 @@ class _AppointmentBookingBottomSheetState
           label: 'VIEW',
           textColor: Colors.white,
           onPressed: () {
-            // Navigate to appointments
+            context.push(AppRouters.kAppointmentsView);
           },
         ),
       ),

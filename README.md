@@ -132,6 +132,14 @@ Esteshara aims to simplify access to professional consultations by connecting us
 
 To improve the booking experience, a valuable feature is sending appointment reminders directly via WhatsApp or SMS. This ensures users receive timely notifications on platforms they already use, significantly reducing no-shows. Offering users the ability to choose their preferred reminder method during booking enhances personalization and reliability.
 
+## Known Limitations
+
+- **No Calendar Sync**: Users cannot yet add appointments to external calendars like Google Calendar or Apple Calendar.
+- **No Push Notifications**: The app does not currently send push reminders; it relies on UI views and planned WhatsApp/SMS support.
+- **No Payment Integration**: The booking flow assumes free consultations; no payment or billing system is integrated yet.
+- **Basic Validation Rules**: Appointment booking logic could be extended to handle more complex scenarios (e.g., overlapping bookings, specialist cancellation policies).
+- **Limited Localization**: The app currently supports only one language; expanding to Arabic or other languages would improve accessibility.
+
 ## Video Walkthrough
 
 _Link to be added: This video will showcase authentication, specialist listing, booking, appointment management, and search functionality._

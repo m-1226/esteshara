@@ -1,33 +1,6 @@
 // features/specialists/data/models/specialist_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-class AvailabilityTime {
-  final String day;
-  final String startTime;
-  final String endTime;
-
-  AvailabilityTime({
-    required this.day,
-    required this.startTime,
-    required this.endTime,
-  });
-
-  factory AvailabilityTime.fromMap(Map<String, dynamic> map) {
-    return AvailabilityTime(
-      day: map['day'] ?? '',
-      startTime: map['startTime'] ?? '',
-      endTime: map['endTime'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'day': day,
-      'startTime': startTime,
-      'endTime': endTime,
-    };
-  }
-}
+import 'package:esteshara/features/home/data/models/availabitily_time.dart';
 
 class SpecialistModel {
   final String id;

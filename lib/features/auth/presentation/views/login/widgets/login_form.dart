@@ -64,7 +64,7 @@ class _LoginFormState extends State<LoginForm> {
           CustomTextInk(
             text1: 'Forgot password?',
             onPressed: () {
-              // context.push(AppRouter.kResetPasswordView);
+              context.push(AppRouters.kResetPasswordView);
             },
           ),
           const SizedBox(height: 15),
