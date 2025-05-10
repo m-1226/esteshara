@@ -74,13 +74,7 @@ Esteshara provides a seamless experience for finding and scheduling consultation
 
         ```bash
         flutter build apk --release
-        ```
-
-    - **iOS**:
-
-        ```bash
-        flutter build ios --release
-        ```
+        ``` 
 
 ## App Architecture
 
@@ -142,7 +136,7 @@ To improve the booking experience, a valuable feature is sending appointment rem
 
 ## Video Walkthrough
 
-_Link to be added: This video will showcase authentication, specialist listing, booking, appointment management, and search functionality._
+Video Walkthrough: [Video Walkthrough](https://youtu.be/ippQRqF-dZk)
 
 ## License
 
